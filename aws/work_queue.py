@@ -5,8 +5,8 @@ import boto3
 from shared.constants import *
 
 
-class SimpleQueueService:
-    """Wrapper class for easy AWS Simple Queue Service (SQS) usage"""
+class WorkQueue:
+    """Wrapper class for easy AWS Simple Queue Service (SQS) usage for work queue"""
 
     def __init__(self):
         self.sqs = boto3.resource(SQS)
