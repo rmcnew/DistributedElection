@@ -1,5 +1,5 @@
+import json
 import logging
-
 import boto3
 
 from shared.constants import *
@@ -15,41 +15,36 @@ class MessageQueue:
         self.sqs = boto3.resource(SQS)
         self.sqs_client = boto3.client(SQS)
         self.queue = self.sqs.create_queue(QueueName=queue_name)
+        self.queue_arn = self.queue.attributes[QUEUE_ARN]
         queue_attributes = MESSAGE_QUEUE_ATTRIBUTES
-        queue_attributes[POLICY] = MessageQueue.create_write_from_sns_policy(self.queue.attributes[QUEUE_ARN])
+        queue_attributes[POLICY] = MessageQueue.create_write_from_sns_policy(self.queue_arn)
+        print ("queue_attributes = {}".format(queue_attributes))
         self.sqs_client.set_queue_attributes(QueueUrl=self.queue.url, Attributes=queue_attributes)
-        self.queue.Attributes = queue_attributes
-        self.subscription = self.topic.subscribe(Protocol=SQS, Endpoint=self.topic_arn)
+        self.subscription = self.topic.subscribe(Protocol=SQS, Endpoint=self.queue_arn)
 
-    def __del__(self):
+    def shutdown(self):
         self.subscription.delete()
+        self.queue.delete()
 
     def get_arn(self):
         return self.queue.attributes[QUEUE_ARN]
 
     @staticmethod
     def create_write_from_sns_policy(queue_arn):
-        policy_document = """{
-  "Id": "Policy1522525396010",
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Sid": "Stmt1522525389948",
-      "Action": [
-        "sqs:SendMessage"
-      ],
-      "Effect": "Allow",
-      "Resource": {}
-      "Principal": {
-        "AWS": [
-          "arn:aws:sns:us-west-2:856259575263:liquid_fortress_distributed_election"
-        ]
-      }
-    }
-  ]
-}""".format(queue_arn)
-        print(policy_document)
-        return policy_document
+        policy_document = {
+            "Version": "2012-10-17",
+            "Id": "MySQSDefaultPolicy",
+            "Statement": [ {
+                "Sid": "Sid1522530097922",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "SQS:SendMessage",
+                "Resource": queue_arn
+            } ]
+        }
+        json_policy_document = json.dumps(policy_document)
+        # print(json_policy_document)
+        return json_policy_document
 
     def send_message(self, message):
         logging.debug("Publishing message: {}".format(message))
@@ -58,12 +53,12 @@ class MessageQueue:
         return result
 
     def receive_message(self):
-        message_list = self.queue.receive_messages()
-        if len(message_list) == 0:
-            return None
-        message = message_list[0]
-        body = message.body
-        message_id = message.message_id
+        messages = self.queue.receive_messages()
+        message = json.loads(messages[0].body)
+        message_id = messages[0].message_id
+        body = message[MESSAGE]
         logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
-        message.delete()
+        print("Received message: \'{}\' with message_id: {}".format(body, message_id))
         return body
+
+
