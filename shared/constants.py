@@ -17,6 +17,6 @@ SQS = "sqs"
 VISIBILITY_TIMEOUT = "VisibilityTimeout"
 WAIT_TIME_SECONDS = "WaitTimeSeconds"
 
-MESSAGE_QUEUE_ATTRIBUTES = {MESSAGE_RETENTION_PERIOD : 60, # seconds 
-                                  VISIBILITY_TIMEOUT : 45, # seconds 
-                   RECEIVE_MESSAGE_WAIT_TIME_SECONDS : 20} # seconds
+MESSAGE_QUEUE_ATTRIBUTES = {MESSAGE_RETENTION_PERIOD: "60",  # seconds
+                            VISIBILITY_TIMEOUT: "45",  # seconds
+                            RECEIVE_MESSAGE_WAIT_TIME_SECONDS: "20"}  # seconds
