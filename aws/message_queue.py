@@ -13,15 +13,19 @@ class MessageQueue:
         self.topic = self.sns.create_topic(Name=LFDE_SNS_TOPIC)
         self.topic_arn = self.topic.arn
         self.sqs = boto3.resource(SQS)
-        self.queue = self.sqs.create_queue(QueueName=queue_name, Attributes=MESSAGE_QUEUE_ATTRIBUTES)
-        self.queue_arn =
+        self.queue_attributes = MESSAGE_QUEUE_ATTRIBUTES
+        self.queue_attributes[POLICY] = create_write_from_sns_policy(self.topic_arn)
+        self.queue = self.sqs.create_queue(QueueName=queue_name, Attributes=self.queue_attributes)
         self.subscription = self.topic.subscribe(Protocol=SQS, Endpoint=self.topic_arn)
+
+    def __del__(self):
+        self.subscription.delete()
 
     def get_arn(self):
         return self.queue.attributes[QUEUE_ARN]
 
     @staticmethod
-    def create_write_to_sns_policy(topicarn, queuearn):
+    def create_write_from_sns_policy(topicarn):
         policy_document = """{{
           "Version":"2012-10-17",
           "Statement":[
@@ -31,24 +35,16 @@ class MessageQueue:
               "Principal" : {{"AWS" : "*"}},
               "Action":"SQS:SendMessage",
               "Resource": "{}",
-              "Condition":{{
-                "ArnEquals":{{
-                  "aws:SourceArn": "{}"
-                }}
-            }}
             }}
           ]
-        }}""".format(queuearn, topicarn)
+        }}""".format(topicarn)
         return policy_document
 
-    def subscribe_to_topic(self, sns):
-        policy = self.create_write_to_sns_policy(sns.get_topic_arn(), self.get_arn())
-
     def send_message(self, msg):
-        response = self.queue.send_message(MessageBody=msg)
-        message_id = response[MESSAGE_ID]
-        logging.debug("Sent message: \'{}\' with message_id: {}".format(msg, message_id))
-        return message_id
+        logging.debug("Publishing message: {}".format(message))
+        result = self.topic.publish(Message=message)
+        logging.debug("Publish result: {}".format(result))
+        return result
 
     def receive_message(self):
         message_list = self.queue.receive_messages()
@@ -60,16 +56,3 @@ class MessageQueue:
             message.delete()
             return body
 
-    def subscribe(self, sqs_arn):
-        self.subscription = self.topic.subscribe(Protocol=SQS, Endpoint=sqs_arn)
-        logging.debug("Subscribe result: {}".format(self.subscription))
-
-    def publish(self, message):
-        logging.debug("Publishing message: {}".format(message))
-        result = self.topic.publish(Message=message)
-        logging.debug("Publish result: {}".format(result))
-        return result
-
-    def unsubscribe(self):
-        self.subscription.delete()
-        self.subscription = None
