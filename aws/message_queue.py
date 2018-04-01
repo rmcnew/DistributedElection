@@ -54,11 +54,14 @@ class MessageQueue:
 
     def receive_message(self):
         messages = self.queue.receive_messages()
-        message = json.loads(messages[0].body)
-        message_id = messages[0].message_id
-        body = message[MESSAGE]
-        logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
-        print("Received message: \'{}\' with message_id: {}".format(body, message_id))
-        return body
+        if len(messages) > 0:
+            message = json.loads(messages[0].body)
+            message_id = messages[0].message_id
+            body = message[MESSAGE]
+            logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
+            print("Received message: \'{}\' with message_id: {}".format(body, message_id))
+            return body
+        else:
+            return None
 
 
