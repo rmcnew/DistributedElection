@@ -1,5 +1,8 @@
 import json
 import logging
+import os
+import time
+
 import boto3
 
 from shared.constants import *
@@ -9,6 +12,7 @@ class MessageQueue:
     """Wrapper class for easy AWS Simple Queue Service (SQS) usage for use as message queue via SNS"""
 
     def __init__(self, queue_name):
+        os.environ['AWS_DEFAULT_REGION'] = "us-west-2"
         self.sns = boto3.resource(SNS)
         self.topic = self.sns.create_topic(Name=LFDE_SNS_TOPIC)
         self.topic_arn = self.topic.arn
@@ -18,12 +22,13 @@ class MessageQueue:
         self.queue_arn = self.queue.attributes[QUEUE_ARN]
         queue_attributes = MESSAGE_QUEUE_ATTRIBUTES
         queue_attributes[POLICY] = MessageQueue.create_write_from_sns_policy(self.queue_arn)
-        print ("queue_attributes = {}".format(queue_attributes))
+        # print ("queue_attributes = {}".format(queue_attributes))
         self.sqs_client.set_queue_attributes(QueueUrl=self.queue.url, Attributes=queue_attributes)
         self.subscription = self.topic.subscribe(Protocol=SQS, Endpoint=self.queue_arn)
 
     def shutdown(self):
         self.subscription.delete()
+        time.sleep(3)
         self.queue.delete()
 
     def get_arn(self):
@@ -34,13 +39,13 @@ class MessageQueue:
         policy_document = {
             "Version": "2012-10-17",
             "Id": "MySQSDefaultPolicy",
-            "Statement": [ {
+            "Statement": [{
                 "Sid": "Sid1522530097922",
                 "Effect": "Allow",
                 "Principal": "*",
                 "Action": "SQS:SendMessage",
                 "Resource": queue_arn
-            } ]
+            }]
         }
         json_policy_document = json.dumps(policy_document)
         # print(json_policy_document)
@@ -58,9 +63,10 @@ class MessageQueue:
             message = json.loads(messages[0].body)
             message_id = messages[0].message_id
             body = message[MESSAGE]
-            logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
-            print("Received message: \'{}\' with message_id: {}".format(body, message_id))
-            return body
+            body_dict = json.loads(body)
+            logging.debug("Received message: \'{}\' with message_id: {}".format(body_dict, message_id))
+            messages[0].delete()
+            return body_dict
         else:
             return None
 

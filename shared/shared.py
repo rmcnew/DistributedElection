@@ -1,6 +1,6 @@
 """ Shared utility functions """
-import socket
 import datetime
+import socket
 
 
 def get_ip_address():
@@ -11,10 +11,12 @@ def get_ip_address():
         return None
     return temp_socket.getsockname()[0]
 
+
 def timestamp():
-    return timestamp.timestamp.now().isoformat()
+    return datetime.datetime.now().isoformat()
+
 
 def get_elapsed_time(start_time):
-    current_time = datetime.now()
+    current_time = datetime.datetime.now()
     elapsed_time = current_time - start_time
     return elapsed_time

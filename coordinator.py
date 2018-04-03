@@ -1,14 +1,14 @@
-import logging
-import datetime
+import signal
+import time
 from multiprocessing import Process, Queue
 from os import getpid
 
+from aws.message_queue import MessageQueue
+from coordinator_modes import Mode
 from edit_distance_worker import EditDistanceWorker
 from messages import *
 from shared.constants import *
 from shared.shared import *
-from aws.message_queue import MessageQueue
-from coordinator_modes import Mode
 
 
 class Coordinator:
@@ -23,6 +23,8 @@ class Coordinator:
         self.message_queue = MessageQueue(self.id)
         self.running = True
         self.mode = Mode.ELECTION
+        self.work_submitted = set()
+        self.work_queue_primed = False
 
     def process_edit_distance(self, string_pair_id, string_a, string_b):
         work_item = (string_pair_id, string_a, string_b)
@@ -38,33 +40,43 @@ class Coordinator:
         return int(self.id) > int(their_id)
 
     def shutdown(self):
-        logging.info("Shutting down . . .")
+        logging.info("Shutting down edit distance worker subprocess . . .")
+        # shutdown edit distance subprocess
         shutdown_item = (SHUTDOWN, "", "")
         self.work_in_queue.put_nowait(shutdown_item)
+        time.sleep(2)
         self.worker_process.join()
+        time.sleep(2)
+        # shutdown message queue
         self.message_queue.shutdown()
 
-    def conduct_election(self):
-        logging.info("Conducting election . . .")
+    def conduct_election(self, ext_message=None):
+        logging.info("Conducting election:  My ID is {} . . .".format(self.id))
         election_over = False
         self.message_queue.send_message(election_begin_message(self.id))
         no_message_count = 0
         election_winner = True
         while not election_over:
-            message = self.message_queue.receive_message()
-            if message != None:
+            if ext_message is not None:
+                message = ext_message
+            else:
+                message = self.message_queue.receive_message()
+            if message is not None:
                 logging.debug("Received message: {}".format(message))
                 if message[MESSAGE_TYPE] == ELECTION_BEGIN:
                     logging.debug("Message type is ELECTION_BEGIN")
                     their_id = message[ID]
-                    if compare_ids(their_id):
-                        logging.debug("My ID={} beats THEIR_ID={}".format(self.id, their_id))
+                    if int(their_id) == int(self.id):
+                        continue  # ignore the message I sent
+                    elif self.compare_ids(their_id):
+                        logging.info("My ID={} beats THEIR_ID={}".format(self.id, their_id))
                         self.message_queue.send_message(election_compare_message(self.id, their_id))
                     else:
-                        logging.debug("My ID={} loses to THEIR_ID={}".format(self.id, their_id))
+                        logging.info("My ID={} loses to THEIR_ID={}".format(self.id, their_id))
                         election_winner = False
                 elif message[MESSAGE_TYPE] == ELECTION_COMPARE:
                     logging.debug("Message type is ELECTION_COMPARE")
+                    logging.info("{}".format(message))
                 elif message[MESSAGE_TYPE] == ELECTION_END:
                     logging.debug("Message type is ELECTION_END")
                     logging.info("Election is over.  New Overseer is: {}".format(message[WINNER_ID]))
@@ -83,12 +95,21 @@ class Coordinator:
                 if election_winner and no_message_count > ELECTION_WINNER_WAIT_CYCLES:
                     self.message_queue.send_message(election_end_message(self.id))
 
-
     def do_work(self):
         logging.info("Doing edit distance work . . .")
+        # wait until work queue is primed
+        while not self.work_queue_primed:
+            message = self.message_queue.receive_message()
+            if message is not None:
+                logging.info("Message received")
+            else:
+                logging.debug("No message received.")
+                time.sleep(2)
 
     def oversee_work(self):
         logging.info("Overseeing work . . .")
+        # prime work queue
+
 
     def run(self):
         while self.running:
@@ -106,12 +127,16 @@ class Coordinator:
 
 
 def main():
+    def ctrl_c_handler(signum, frame):
+        coordinator.shutdown()
+
+    signal.signal(signal.SIGINT, ctrl_c_handler)
     log_file = COORDINATOR_LOG
     logging.basicConfig(format='%(message)s',
-                        filename=log_file,
-                        level=logging.DEBUG)
-    coodinator = Coordinator()
-    coodinator.run()
+                        # filename=log_file,
+                        level=logging.INFO)
+    coordinator = Coordinator()
+    coordinator.run()
 
 
 if __name__ == "__main__":
