@@ -1,0 +1,78 @@
+import logging
+
+from messages import *
+
+
+class Elector:
+
+    def __init__(self, my_id, election_in_queue, election_out_queue):
+        self.my_id = my_id
+        self.election_in_queue = election_in_queue
+        self.election_out_queue = election_out_queue
+        self.election_over = False
+        self.election_winner = True
+        self.null_message_count = 0
+
+    def compare_ids(self, their_id):
+        return int(self.my_id) > int(their_id)
+
+    def conduct_election(self):
+        # send out my_id in a election_id_declare_message
+        self.election_out_queue(election_id_declare_message(self.my))
+        # then wait for responses from other processes
+        while not self.election_over:
+            # blocking get
+            message = self.election_in_queue.get()
+            logging.debug("Received message: {}".format(message))
+            # compare my_id against another process's id
+            if message[MESSAGE_TYPE] == ELECTION_ID_DECLARE:
+                logging.debug("Message type is ELECTION_ID_DECLARE")
+                their_id = message[ID]
+                if int(their_id) == int(self.my_id):
+                    continue  # ignore the message I sent
+                elif self.compare_ids(their_id):
+                    logging.info("My ID={} beats THEIR_ID={}".format(self.my_id, their_id))
+                    self.election_out_queue.put(election_compare_message(self.my_id, their_id))
+                else:
+                    logging.info("My ID={} loses to THEIR_ID={}".format(self.my_id, their_id))
+                    self.election_winner = False
+            elif message[MESSAGE_TYPE] == ELECTION_COMPARE:
+                logging.debug("Message type is ELECTION_COMPARE")
+                logging.info("{}".format(message))
+            elif message[MESSAGE_TYPE] == ELECTION_END:
+                logging.debug("Message type is ELECTION_END")
+                logging.info("Election is over.  New Overseer is: {}".format(message[WINNER_ID]))
+                self.election_over = True
+                if self.election_winner:
+                    logging.debug("Changing to OVERSEER mode!")
+                    self.election_out_queue.put(internal_mode_switch_to_overseer_message())
+                else:
+                    logging.debug("Changing to WORKER mode!")
+                    self.election_out_queue.put(internal_mode_switch_to_worker_message())
+            elif message[MESSAGE_TYPE] == NULL_MESSAGE:
+                logging.debug("Null message received.")
+                self.null_message_count = self.null_message_count + 1
+                if self.election_winner and self.null_message_count > ELECTION_WINNER_WAIT_CYCLES:
+                    self.election_out_queue.put(election_end_message(self.my_id))
+            else:
+                logging.debug("Unknown message type: {}".format(message[MESSAGE_TYPE]))
+
+    def run(self):
+        # on initial start-up, kick off an election
+        logging.info("Conducting election:  My ID is {} . . .".format(self.my_id))
+        self.election_out_queue.put(election_begin_message())
+        # otherwise, wait for messages announcing a new election
+        while True:
+            # blocking message get
+            message = self.election_in_queue.get()
+            if message[MESSAGE_TYPE] == ELECTION_BEGIN:
+                self.election_over = False
+                self.null_message_count = 0
+                self.election_winner = True
+                self.conduct_election()
+            elif message[MESSAGE_TYPE] == SHUTDOWN:
+                logging.debug("Shutting down . . .")
+                break
+            else:
+                logging.error("Elector does not know how to handle message_type: {}!  "
+                              "Received this message:  {}".format(message[MESSAGE_TYPE], message))

@@ -2,12 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a4a809c4-c2be-4bfa-8ccd-784460c427ef" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/elector.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/overseer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/aws/message_queue.py" beforeDir="false" afterPath="$PROJECT_DIR$/aws/message_queue.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/coordinator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/edit_distance_worker.py" beforeDir="false" afterPath="$PROJECT_DIR$/edit_distance_worker.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/messages.py" beforeDir="false" afterPath="$PROJECT_DIR$/messages.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/shared/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/shared/constants.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/shared.py" beforeDir="false" afterPath="$PROJECT_DIR$/shared/shared.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -16,22 +17,41 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DockManager">
+    <window id="3">
+      <content type="file-editors">
+        <state>
+          <leaf>
+            <file leaf-file-name="edit_distance_worker.py" pinned="false" current-in-tab="true">
+              <entry file="file://$PROJECT_DIR$/edit_distance_worker.py">
+                <provider selected="true" editor-type-id="text-editor">
+                  <state relative-caret-position="648">
+                    <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
+                  </state>
+                </provider>
+              </entry>
+            </file>
+          </leaf>
+        </state>
+      </content>
+    </window>
+  </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file leaf-file-name="constants.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/shared/constants.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="738">
-              <caret line="41" column="36" selection-start-line="41" selection-start-column="36" selection-end-line="41" selection-end-column="36" />
+              <caret line="41" column="14" selection-start-line="41" selection-start-column="14" selection-end-line="41" selection-end-column="14" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="s3.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/aws/s3.py">
+      <file leaf-file-name="coordinator.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coordinator.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="450">
-              <caret line="25" column="68" selection-start-line="25" selection-start-column="68" selection-end-line="25" selection-end-column="68" />
+            <state relative-caret-position="529">
+              <caret line="64" column="45" lean-forward="true" selection-start-line="64" selection-start-column="45" selection-end-line="64" selection-end-column="45" />
             </state>
           </provider>
         </entry>
@@ -40,34 +60,7 @@
         <entry file="file://$PROJECT_DIR$/aws/message_queue.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="727">
-              <caret line="66" column="32" selection-start-line="66" selection-start-column="32" selection-end-line="66" selection-end-column="32" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="edit_distance_worker.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/edit_distance_worker.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="252">
-              <caret line="14" column="19" selection-start-line="14" selection-start-column="19" selection-end-line="14" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="coordinator.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/coordinator.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="504">
-              <caret line="53" lean-forward="true" selection-start-line="53" selection-end-line="53" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="messages.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/messages.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="619">
-              <caret line="52" column="33" selection-start-line="52" selection-start-column="33" selection-end-line="52" selection-end-column="33" />
+              <caret line="67" column="32" selection-start-line="67" selection-start-column="32" selection-end-line="67" selection-end-column="32" />
             </state>
           </provider>
         </entry>
@@ -81,11 +74,47 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="edit_distance.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/edit_distance/edit_distance.py">
+      <file leaf-file-name="elector.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/elector.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="144">
-              <caret line="8" column="42" selection-start-line="8" selection-start-column="42" selection-end-line="8" selection-end-column="42" />
+            <state relative-caret-position="871">
+              <caret line="76" column="38" selection-start-line="76" selection-start-column="38" selection-end-line="76" selection-end-column="38" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="overseer.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/overseer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="565">
+              <caret line="42" lean-forward="true" selection-start-line="42" selection-end-line="42" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="s3.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/aws/s3.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="450">
+              <caret line="25" column="68" selection-start-line="25" selection-start-column="68" selection-end-line="25" selection-end-column="68" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="work_queue.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/aws/work_queue.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="252">
+              <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="messages.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/messages.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1591">
+              <caret line="109" column="28" selection-start-line="109" selection-start-column="28" selection-end-line="109" selection-end-column="28" />
             </state>
           </provider>
         </entry>
@@ -115,13 +144,15 @@
         <option value="$PROJECT_DIR$/aws/sqs.py" />
         <option value="$PROJECT_DIR$/aws/s3.py" />
         <option value="$PROJECT_DIR$/aws/sns.py" />
-        <option value="$PROJECT_DIR$/edit_distance_worker.py" />
         <option value="$PROJECT_DIR$/edit_distance/edit_distance.py" />
         <option value="$PROJECT_DIR$/shared/shared.py" />
-        <option value="$PROJECT_DIR$/shared/constants.py" />
-        <option value="$PROJECT_DIR$/messages.py" />
         <option value="$PROJECT_DIR$/aws/message_queue.py" />
+        <option value="$PROJECT_DIR$/edit_distance_worker.py" />
+        <option value="$PROJECT_DIR$/elector.py" />
         <option value="$PROJECT_DIR$/coordinator.py" />
+        <option value="$PROJECT_DIR$/messages.py" />
+        <option value="$PROJECT_DIR$/shared/constants.py" />
+        <option value="$PROJECT_DIR$/overseer.py" />
       </list>
     </option>
   </component>
@@ -294,7 +325,14 @@
       <option name="project" value="LOCAL" />
       <updated>1522560304337</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Basic election works.  Need to restructure message handling to enable greater flexibility so that an election_begin message received in any mode can cleanly proceed to election.  Initial versions of most message structures defined.">
+      <created>1522733220582</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1522733220582</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -336,11 +374,26 @@
     <MESSAGE value="Checkpoint:  combine message_queue and sns to provide message_queue abstraction" />
     <MESSAGE value="Checkpoint:  fixing queue policy" />
     <MESSAGE value="Coordinator hand-off to/from EditDistanceWorker works.  Coordinator ID comparison works.  Next integrate AWS messaging into Coordinator and begin building state machines." />
-    <option name="LAST_COMMIT_MESSAGE" value="Coordinator hand-off to/from EditDistanceWorker works.  Coordinator ID comparison works.  Next integrate AWS messaging into Coordinator and begin building state machines." />
+    <MESSAGE value="Basic election works.  Need to restructure message handling to enable greater flexibility so that an election_begin message received in any mode can cleanly proceed to election.  Initial versions of most message structures defined." />
+    <option name="LAST_COMMIT_MESSAGE" value="Basic election works.  Need to restructure message handling to enable greater flexibility so that an election_begin message received in any mode can cleanly proceed to election.  Initial versions of most message structures defined." />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/messages.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="936">
+          <caret line="52" column="33" selection-start-line="52" selection-start-column="33" selection-end-line="52" selection-end-column="33" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coordinator.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="972">
+          <caret line="54" column="29" lean-forward="true" selection-start-line="54" selection-start-column="29" selection-end-line="54" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/shared/constants.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="414">
@@ -567,41 +620,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/aws/sqs.py" />
     <entry file="file://$PROJECT_DIR$/aws/sns.py" />
-    <entry file="file://$PROJECT_DIR$/aws/s3.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="450">
-          <caret line="25" column="68" selection-start-line="25" selection-start-column="68" selection-end-line="25" selection-end-column="68" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/aws/work_queue.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coordinator_modes.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/edit_distance_worker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="14" column="19" selection-start-line="14" selection-start-column="19" selection-end-line="14" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/edit_distance/edit_distance.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="144">
           <caret line="8" column="42" selection-start-line="8" selection-start-column="42" selection-end-line="8" selection-end-column="42" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/shared/constants.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="738">
-          <caret line="41" column="36" selection-start-line="41" selection-start-column="36" selection-end-line="41" selection-end-column="36" />
         </state>
       </provider>
     </entry>
@@ -612,24 +634,66 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/messages.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="619">
-          <caret line="52" column="33" selection-start-line="52" selection-start-column="33" selection-end-line="52" selection-end-column="33" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/aws/message_queue.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="727">
-          <caret line="66" column="32" selection-start-line="66" selection-start-column="32" selection-end-line="66" selection-end-column="32" />
+          <caret line="67" column="32" selection-start-line="67" selection-start-column="32" selection-end-line="67" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/elector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="871">
+          <caret line="76" column="38" selection-start-line="76" selection-start-column="38" selection-end-line="76" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/edit_distance_worker.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="648">
+          <caret line="36" lean-forward="true" selection-start-line="36" selection-end-line="36" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/coordinator.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="504">
-          <caret line="53" lean-forward="true" selection-start-line="53" selection-end-line="53" />
+        <state relative-caret-position="529">
+          <caret line="64" column="45" lean-forward="true" selection-start-line="64" selection-start-column="45" selection-end-line="64" selection-end-column="45" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/shared/constants.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="738">
+          <caret line="41" column="14" selection-start-line="41" selection-start-column="14" selection-end-line="41" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/aws/s3.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="25" column="68" selection-start-line="25" selection-start-column="68" selection-end-line="25" selection-end-column="68" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/messages.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1591">
+          <caret line="109" column="28" selection-start-line="109" selection-start-column="28" selection-end-line="109" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/aws/work_queue.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="252">
+          <caret line="14" column="21" selection-start-line="14" selection-start-column="21" selection-end-line="14" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/overseer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="565">
+          <caret line="42" lean-forward="true" selection-start-line="42" selection-end-line="42" />
         </state>
       </provider>
     </entry>

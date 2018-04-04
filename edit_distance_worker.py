@@ -1,26 +1,33 @@
-import time
+import logging
 
 from edit_distance.edit_distance import EditDistanceCalculator
-from shared.constants import *
+from messages import *
 
 
 class EditDistanceWorker:
 
-    def __init__(self, work_in_queue, work_out_queue):
+    def __init__(self, my_id, work_in_queue, work_out_queue):
+        self.my_id = my_id
         self.work_in_queue = work_in_queue
         self.work_out_queue = work_out_queue
         self.calculator = EditDistanceCalculator()
 
     def run(self):
         while True:
-            if not self.work_in_queue.empty():
-                (string_pair_id, string_a, string_b) = self.work_in_queue.get(block=False,
-                                                                              timeout=WORK_IN_QUEUE_TIMEOUT)
-                print("Received from work_in_queue: string_pair_id={}, string_a={}, string_b={}"
-                      .format(string_pair_id, string_a, string_b))
-                if string_pair_id == SHUTDOWN:
-                    break
+            # blocking wait to get the next message
+            message = self.work_in_queue.get()
+            if message[MESSAGE_TYPE] == SHUTDOWN:
+                logging.debug("Shutting down . . .")
+                break
+            elif message[MESSAGE_TYPE] == WORK_RESPONSE:
+                # a work_response_message is received
+                logging.debug("Received work_response message: {}".format(message))
+                string_pair_id = message[STRING_PAIR_ID]
+                string_a = message[STRING_A]
+                string_b = message[STRING_B]
                 edit_distance = self.calculator.calculate_edit_distance(string_a, string_b)
-                ret_val = (string_pair_id, edit_distance)
-                self.work_out_queue.put(ret_val)
-            time.sleep(EDIT_DISTANCE_WORKER_SLEEP)
+                result = work_result_message(self.my_id, string_pair_id, edit_distance)
+                self.work_out_queue.put(result)
+            else:
+                logging.error("EditDistanceWorker does not know how to handle message_type: {}!  "
+                              "Received this message:  {}".format(message[MESSAGE_TYPE], message))
