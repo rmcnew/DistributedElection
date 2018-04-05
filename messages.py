@@ -74,6 +74,15 @@ def work_request_message(my_id):
     return json.dumps(message)
 
 
+def work_item_message(string_pair_id, string_a, string_b):
+    """Message placed in work_queue"""
+    message = {MESSAGE_TYPE: WORK_ITEM,
+               STRING_PAIR_ID: string_pair_id,
+               STRING_A: string_a,
+               STRING_B: string_b}
+    return json.dumps(message)
+
+
 def work_response_message(requester_id, string_pair_id, string_a, string_b):
     """Message sent by the overseer to a worker to provide a work item"""
     message = {MESSAGE_TYPE: WORK_RESPONSE,

@@ -1,6 +1,7 @@
 """ Shared utility functions """
 import datetime
 import socket
+import tempfile
 
 
 def get_ip_address():
@@ -20,3 +21,7 @@ def get_elapsed_time(start_time):
     current_time = datetime.datetime.now()
     elapsed_time = current_time - start_time
     return elapsed_time
+
+
+def get_temp_dir():
+    return tempfile.mkdtemp() 

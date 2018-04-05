@@ -3,6 +3,7 @@ import logging
 from aws.s3 import SimpleStorageService
 from aws.work_queue import WorkQueue
 from messages import *
+from shared.shared import *
 
 
 class Overseer:
@@ -42,15 +43,26 @@ class Overseer:
                         self.overseer_out_queue.put(work_list_message(self.input_folder_contents))
                         self.setup_input_folder_not_submitted()
 
-                    # prime the work queue and notify as we go
+                        # prime the work queue and notify as we go
+                        temp_dir = shared.get_temp_dir()
+                        for item in self.input_folder_contents:    
+                            temp_file = item.replace("/", "_")
+                            temp_path = "{}/{}".format(temp_dir, temp_file)
+                            self.s3.download_string_pair(item, temp_path) 
+                            string_pair_file = open(temp_path, READ_ONLY)
+                            string_a = string_pair_file.readline()
+                            string_b = string_pair_file.readline()
+                            self.work_queue.send_message(work_item_message(item, string_a, string_b)
+                            self.message_queue(prime_work_queue_message(current_batch)
 
-                    # announce when the work queue is primed
+                        # announce when the work queue is primed
+                        self.message_queue(work_ready_message())
 
-                    # begin taking work requests
+                        # begin taking work requests
 
-                    # if the work queue is empty and there are no requests out, notify workers individually to shutdown
+                        # if the work queue is empty and there are no requests out, notify workers individually to shutdown
 
-                    # after all work is down notify coordinator to shutdown
+                        # after all work is down notify coordinator to shutdown
 
                 else:  # we are a standby overseer, track messages from the active overseer
                     # get the input folder contents from the work_list_message
