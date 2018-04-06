@@ -10,6 +10,7 @@ class WorkQueue:
 
     def __init__(self):
         self.sqs = boto3.resource(SQS)
+        self.sqs_client = boto3.client(SQS)
         self.queue = self.sqs.get_queue_by_name(QueueName=LFDE_SQS_QUEUE)
 
     def send_message(self, msg):
@@ -20,9 +21,15 @@ class WorkQueue:
 
     def receive_message(self):
         message_list = self.queue.receive_messages()
-        message = message_list[0]
-        body = message.body
-        message_id = message.message_id
-        logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
-        message.delete()
-        return body
+        if len(message_list) > 0:
+            message = message_list[0]
+            body = message.body
+            message_id = message.message_id
+            logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
+            message.delete()
+            return body
+        else:
+            return None
+
+    def delete_message(self, receipt_handle):
+        self.sqs_client.delete_message(QueueUrl=self.queue.url, ReceiptHandle=receipt_handle)

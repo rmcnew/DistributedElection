@@ -51,10 +51,10 @@ def work_list_message(work_list):
     return json.dumps(message)
 
 
-def prime_work_queue_message(work_submitted_list):
+def prime_work_queue_message(work_item_submitted):
     """Message that gives work items submitted to the work queue by the overseer"""
     message = {MESSAGE_TYPE: PRIME_WORK_QUEUE,
-               WORK_SUBMITTED_LIST: work_submitted_list,
+               WORK_ITEM_SUBMITTED: work_item_submitted,
                TIMESTAMP: timestamp()}
     return json.dumps(message)
 
@@ -83,23 +83,25 @@ def work_item_message(string_pair_id, string_a, string_b):
     return json.dumps(message)
 
 
-def work_response_message(requester_id, string_pair_id, string_a, string_b):
+def work_response_message(requester_id, string_pair_id, string_a, string_b, receipt_handle):
     """Message sent by the overseer to a worker to provide a work item"""
     message = {MESSAGE_TYPE: WORK_RESPONSE,
                REQUESTER_ID: requester_id,
                STRING_PAIR_ID: string_pair_id,
                STRING_A: string_a,
                STRING_B: string_b,
+               RECEIPT_HANDLE: receipt_handle,
                TIMESTAMP: timestamp()}
     return json.dumps(message)
 
 
-def work_result_message(my_id, string_pair_id, edit_distance):
+def work_result_message(my_id, string_pair_id, edit_distance, receipt_handle):
     """Message sent by a worker to the overseer to give a work item result"""
     message = {MESSAGE_TYPE: WORK_RESULT,
                REQUESTER_ID: my_id,
                STRING_PAIR_ID: string_pair_id,
                EDIT_DISTANCE: edit_distance,
+               RECEIPT_HANDLE: receipt_handle,
                TIMESTAMP: timestamp()}
     return json.dumps(message)
 

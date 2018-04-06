@@ -29,6 +29,7 @@ POLICY = "Policy"
 PRIME_WORK_QUEUE = "prime_work_queue"
 QUEUE_ARN = "QueueArn"
 READ_ONLY = "r"
+RECEIPT_HANDLE = "receipt_handle"
 RECEIVE_MESSAGE_WAIT_TIME_SECONDS = "ReceiveMessageWaitTimeSeconds"
 REQUESTER_ID = "requester_id"
 S3 = "s3"
@@ -46,13 +47,14 @@ WAIT_TIME_SECONDS = "WaitTimeSeconds"
 WINNER_ID = "winner_id"
 WORK_IN_QUEUE_TIMEOUT = 2  # seconds
 WORK_ITEM = "work_item"
+WORK_ITEM_SUBMITTED = "work_item_submitted"
 WORK_LIST = "work_list"
 WORK_QUEUE_READY = "work_queue_ready"
 WORK_REQUEST = "work_request"
 WORK_RESPONSE = "work_response"
 WORK_RESULT = "work_result"
 WORK_RESULT_RECEIVED = "work_result_received"
-WORK_SUBMITTED_LIST = "work_submitted_list"
+WRITE_ONLY = "w"
 
 MESSAGE_QUEUE_ATTRIBUTES = {MESSAGE_RETENTION_PERIOD: "600",  # seconds
                             VISIBILITY_TIMEOUT: "120",  # seconds
