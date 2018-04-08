@@ -1,3 +1,4 @@
+import json
 import logging
 
 import boto3
@@ -16,18 +17,22 @@ class WorkQueue:
     def send_message(self, msg):
         response = self.queue.send_message(MessageBody=msg)
         message_id = response[MESSAGE_ID]
-        logging.debug("Sent message: \'{}\' with message_id: {}".format(msg, message_id))
+        logging.debug("Sent message: {}".format(msg))
         return message_id
 
     def receive_message(self):
-        message_list = self.queue.receive_messages()
-        if len(message_list) > 0:
-            message = message_list[0]
-            body = message.body
-            message_id = message.message_id
-            logging.debug("Received message: \'{}\' with message_id: {}".format(body, message_id))
-            message.delete()
-            return body
+        messages = self.queue.receive_messages()
+        if len(messages) > 0:
+            message = json.loads(messages[0].body)
+            message_id = messages[0].message_id
+            receipt_handle = message[0].receipt_handle
+            body = message[MESSAGE]
+            body_dict = json.loads(body)
+            body_dict[MESSAGE_ID] = message_id
+            body_dict[RECEIPT_HANDLE] = receipt_handle
+            logging.debug("Returning message: {}".format(body))
+            messages[0].delete()
+            return body_dict
         else:
             return None
 

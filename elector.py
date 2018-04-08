@@ -10,7 +10,7 @@ class Elector:
         self.election_in_queue = election_in_queue
         self.election_out_queue = election_out_queue
         self.election_over = False
-        self.election_winner = True
+        self.election_winner = False
         self.null_message_count = 0
 
     def compare_ids(self, their_id):
@@ -18,7 +18,7 @@ class Elector:
 
     def conduct_election(self):
         # send out my_id in a election_id_declare_message
-        self.election_out_queue(election_id_declare_message(self.my))
+        self.election_out_queue.put(election_id_declare_message(self.my_id))
         # then wait for responses from other processes
         while not self.election_over:
             # blocking get
@@ -33,6 +33,8 @@ class Elector:
                 elif self.compare_ids(their_id):
                     logging.info("My ID={} beats THEIR_ID={}".format(self.my_id, their_id))
                     self.election_out_queue.put(election_compare_message(self.my_id, their_id))
+                    self.election_winner = True
+                    self.election_out_queue.put(election_id_declare_message(self.my_id))  # declare again
                 else:
                     logging.info("My ID={} loses to THEIR_ID={}".format(self.my_id, their_id))
                     self.election_winner = False
@@ -43,19 +45,20 @@ class Elector:
                 logging.debug("Message type is ELECTION_END")
                 logging.info("Election is over.  New Overseer is: {}".format(message[WINNER_ID]))
                 self.election_over = True
+                self.null_message_count = 0  # reset to enable detection of missing active overseer
                 if self.election_winner:
-                    logging.debug("Changing to OVERSEER mode!")
+                    logging.info("Election won!  Changing to OVERSEER mode!")
                     self.election_out_queue.put(internal_mode_switch_to_overseer_message())
                 else:
-                    logging.debug("Changing to WORKER mode!")
+                    logging.info("Election lost.  Changing to WORKER mode!")
                     self.election_out_queue.put(internal_mode_switch_to_worker_message())
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 logging.debug("Null message received.")
                 self.null_message_count = self.null_message_count + 1
                 if self.election_winner and self.null_message_count > ELECTION_WINNER_WAIT_CYCLES:
                     self.election_out_queue.put(election_end_message(self.my_id))
-            else:
-                logging.debug("Unknown message type: {}".format(message[MESSAGE_TYPE]))
+            else:  # ignore other message types
+                pass
 
     def run(self):
         # on initial start-up, kick off an election
@@ -65,14 +68,27 @@ class Elector:
         while True:
             # blocking message get
             message = self.election_in_queue.get()
-            if message[MESSAGE_TYPE] == ELECTION_BEGIN:
+            # respond to shutdown request
+            if message[MESSAGE_TYPE] == SHUTDOWN:
+                logging.debug("Shutting down . . .")
+                break
+            # if we get too many null messages, call for an election
+            elif message[MESSAGE_TYPE] == NULL_MESSAGE:
+                self.null_message_count = self.null_message_count + 1
+                if self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT:
+                    logging.info("No response from active Overseer.  "
+                                 "Conducting election:  My ID is {} . . .".format(self.my_id))
+                    self.election_out_queue.put(election_begin_message())
+            # if we get an ELECTION_BEGIN message, conduct an election
+            elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
                 self.election_over = False
                 self.null_message_count = 0
                 self.election_winner = True
                 self.conduct_election()
-            elif message[MESSAGE_TYPE] == SHUTDOWN:
-                logging.debug("Shutting down . . .")
-                break
-            else:
-                logging.error("Elector does not know how to handle message_type: {}!  "
-                              "Received this message:  {}".format(message[MESSAGE_TYPE], message))
+            # as long as we see messages from the active overseer, reset the null message counter
+            elif message[MESSAGE_TYPE] == WORK_LIST or message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
+                    message[MESSAGE_TYPE] == WORK_QUEUE_READY or message[MESSAGE_TYPE] == WORK_RESPONSE or \
+                    message[MESSAGE_TYPE] == WORK_RESULT_RECEIVED:
+                self.null_message_count = 0
+            else:  # ignore other message types
+                pass

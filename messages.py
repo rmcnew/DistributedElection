@@ -6,8 +6,7 @@ from shared.shared import timestamp
 
 def null_message():
     """Empty message that represents no message received during the previous message poll period"""
-    message = {MESSAGE_TYPE: NULL_MESSAGE}
-    return json.dumps(message)
+    return {MESSAGE_TYPE: NULL_MESSAGE}
 
 
 def election_begin_message():
@@ -117,7 +116,7 @@ def work_result_received_message(requester_id, string_pair_id):
 
 def individual_shutdown_message(to_id):
     """Message that directs ONLY the receiver to cleanly shutdown"""
-    message = {MESSAGE_TYPE: SHUTDOWN,
+    message = {MESSAGE_TYPE: INDIVIDUAL_SHUTDOWN,
                TO_ID: to_id,
                TIMESTAMP: timestamp()}
     return json.dumps(message)
