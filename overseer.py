@@ -1,4 +1,7 @@
 import logging
+import os
+import time
+from pathlib import Path
 
 from aws.s3 import SimpleStorageService
 from aws.work_queue import WorkQueue
@@ -74,33 +77,44 @@ class Overseer:
             string_pair_id = work_item_msg[STRING_PAIR_ID]
             string_a = work_item_msg[STRING_A]
             string_b = work_item_msg[STRING_B]
+            message_id = work_item_msg[MESSAGE_ID]
             receipt_handle = work_item_msg[RECEIPT_HANDLE]
             self.overseer_out_queue.put(work_response_message(requester_id, string_pair_id,
-                                                              string_a, string_b, receipt_handle))
+                                                              string_a, string_b,
+                                                              message_id, receipt_handle))
         else:  # work_item_mgs is None
             # if the work queue is empty, notify workers individually to shutdown
             self.overseer_out_queue.put(individual_shutdown_message(requester_id))
 
-    def upload_edit_distance(self, string_pair_id, edit_distance):
-        logging.info("[ACTIVE OVERSEER] Uploading edit_distance to S3")
+    def upload_edit_distance(self, long_string_pair_id, edit_distance):
+        string_pair_id = Path(long_string_pair_id).name
+        logging.info("[ACTIVE OVERSEER] Writing to temp file")
         temp_result_filename = "{}/{}_result".format(self.temp_dir, string_pair_id)
         temp_result_file = open(temp_result_filename, WRITE_ONLY)
         temp_result_file.write("{}, {}".format(string_pair_id, edit_distance))
         temp_result_file.close()
+        logging.info("[ACTIVE OVERSEER] Uploading temp file to S3")
+        time.sleep(1)
         self.s3.upload_string_pair_result("{}_result".format(string_pair_id), temp_result_filename)
+        logging.info("[ACTIVE OVERSEER] Removing temp file")
+        os.remove(temp_result_filename)
 
     def handle_work_result_message(self, message):
         logging.info("[ACTIVE OVERSEER] Handling work result message")
         requester_id = message[REQUESTER_ID]
         string_pair_id = message[STRING_PAIR_ID]
         edit_distance = message[EDIT_DISTANCE]
+        message_id = message[MESSAGE_ID]
         receipt_handle = message[RECEIPT_HANDLE]
         # upload the result to S3
+        logging.info("[ACTIVE OVERSEER] Uploading edit_distance to S3")
         self.upload_edit_distance(string_pair_id, edit_distance)
         # send out result message
+        logging.info("[ACTIVE OVERSEER] Sending work result received message to worker ID: {}".format(requester_id))
         self.overseer_out_queue.put(work_result_received_message(requester_id, string_pair_id))
         # delete the work queue message
-        self.work_queue.delete_message(receipt_handle)
+        logging.info("[ACTIVE OVERSEER] Deleting work item from work queue")
+        self.work_queue.delete_message(message_id, receipt_handle)
 
     def do_active_overseer_tasks(self):
         if self.active_overseer:  # we are the active overseer!

@@ -9,8 +9,8 @@ class SimpleStorageService:
     """Wrapper class for easy AWS Simple Storage Service (S3) usage"""
 
     def __init__(self):
-        self.s3 = boto3.resource(S3)
-        self.s3client = boto3.client(S3)
+        self.s3 = boto3.resource(S3, region_name='us-west-2')
+        self.s3client = boto3.client(S3, region_name='us-west-2')
         self.lfde_bucket = self.s3.Bucket(LFDE_S3_BUCKET)
 
     def list_folder_contents(self, prefix):

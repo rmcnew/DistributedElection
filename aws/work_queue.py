@@ -10,8 +10,7 @@ class WorkQueue:
     """Wrapper class for easy AWS Simple Queue Service (SQS) usage for work queue"""
 
     def __init__(self):
-        self.sqs = boto3.resource(SQS)
-        self.sqs_client = boto3.client(SQS)
+        self.sqs = boto3.resource(SQS, region_name='us-west-2')
         self.queue = self.sqs.get_queue_by_name(QueueName=LFDE_SQS_QUEUE)
 
     def send_message(self, msg):
@@ -25,16 +24,20 @@ class WorkQueue:
         if len(messages) > 0:
             message = json.loads(messages[0].body)
             message_id = messages[0].message_id
-            receipt_handle = message[0].receipt_handle
-            body = message[MESSAGE]
-            body_dict = json.loads(body)
-            body_dict[MESSAGE_ID] = message_id
-            body_dict[RECEIPT_HANDLE] = receipt_handle
-            logging.debug("Returning message: {}".format(body))
-            messages[0].delete()
-            return body_dict
+            receipt_handle = messages[0].receipt_handle
+            message[MESSAGE_ID] = message_id
+            message[RECEIPT_HANDLE] = receipt_handle
+            logging.debug("Returning message: {}".format(message))
+            return message
         else:
             return None
 
-    def delete_message(self, receipt_handle):
-        self.sqs_client.delete_message(QueueUrl=self.queue.url, ReceiptHandle=receipt_handle)
+    def delete_message(self, message_id, receipt_handle):
+        self.queue.delete_messages(
+            Entries=[
+                {
+                    'Id': message_id,
+                    'ReceiptHandle': receipt_handle
+                },
+            ]
+        )
