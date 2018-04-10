@@ -25,9 +25,12 @@ class MessageQueue:
         self.subscription = self.topic.subscribe(Protocol=SQS, Endpoint=self.queue_arn)
 
     def shutdown(self):
-        self.subscription.delete()
-        time.sleep(3)
-        self.queue.delete()
+        try:
+            self.subscription.delete()
+            time.sleep(3)
+            self.queue.delete()  # always seems to cause botocore.errorfactory.QueueDoesNotExist exception
+        except:
+            pass
 
     def get_arn(self):
         return self.queue.attributes[QUEUE_ARN]

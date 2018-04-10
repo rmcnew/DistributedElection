@@ -44,6 +44,7 @@ class Coordinator:
     def shutdown(self):
         if not self.in_shutdown:  # prevent multiple calls
             logging.info("Received SHUTDOWN directive!")
+            self.running = False
             self.in_shutdown = True
             logging.info("Shutting down subprocesses . . .")
             # send shutdown message to subprocesses
@@ -64,7 +65,7 @@ class Coordinator:
             logging.info("Exiting . . .")
 
     def send_outbound_messages(self, out_queue):
-        while not out_queue.empty():
+        while self.running and not out_queue.empty():
             message = out_queue.get()
             message_obj = json.loads(message)
             if message_obj[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_WORKER or \
@@ -81,18 +82,19 @@ class Coordinator:
     def get_and_route_messages(self):
         # get message from message queue;
         # route received messages to all subprocess in_queues; let subprocesses filter messages of interest
-        message = self.message_queue.receive_message()
-        logging.debug("message is {}".format(message))
-        if message is None:  # if no message received within timeout, send NULL_MESSAGE
-            message = null_message()
-        if message[MESSAGE_TYPE] == INDIVIDUAL_SHUTDOWN and message[TO_ID] == self.my_id:
-            self.shutdown()
-        elif message[MESSAGE_TYPE] == SHUTDOWN:
-            self.shutdown()
-        else:
-            self.election_in_queue.put(message)
-            self.overseer_in_queue.put(message)
-            self.worker_in_queue.put(message)
+        if self.running:
+            message = self.message_queue.receive_message()
+            logging.debug("message is {}".format(message))
+            if message is None:  # if no message received within timeout, send NULL_MESSAGE
+                message = null_message()
+            if message[MESSAGE_TYPE] == INDIVIDUAL_SHUTDOWN and message[TO_ID] == self.my_id:
+                self.shutdown()
+            elif message[MESSAGE_TYPE] == SHUTDOWN:
+                self.shutdown()
+            else:
+                self.election_in_queue.put(message)
+                self.overseer_in_queue.put(message)
+                self.worker_in_queue.put(message)
 
     def run(self):
         while self.running:
