@@ -75,10 +75,13 @@ class Elector:
             # if we get too many null messages, call for an election
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 self.null_message_count = self.null_message_count + 1
-                if self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT:
+                if self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and not self.election_winner:
                     logging.info("No response from active Overseer.  "
                                  "Conducting election:  My ID is {} . . .".format(self.my_id))
                     self.election_out_queue.put(election_begin_message())
+                elif self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and self.election_winner:
+                    logging.info("No activity.  Asking Overseer process if quit criteria reached")
+                    self.election_out_queue.put(internal_can_quit_message())
             # if we get an ELECTION_BEGIN message, conduct an election
             elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
                 self.election_over = False

@@ -43,31 +43,38 @@ class Coordinator:
 
     def shutdown(self):
         if not self.in_shutdown:  # prevent multiple calls
+            logging.info("Received SHUTDOWN directive!")
             self.in_shutdown = True
-            logging.info("Shutting down edit distance worker subprocess . . .")
+            logging.info("Shutting down subprocesses . . .")
             # send shutdown message to subprocesses
-            shutdown_msg = shutdown_message()
-            self.worker_in_queue.put_nowait(shutdown_msg)
-            self.overseer_in_queue.put_nowait(shutdown_msg)
-            self.election_in_queue.put_nowait(shutdown_msg)
+            shutdown_msg = internal_shutdown_message()
+            self.worker_in_queue.put(shutdown_msg)
+            self.overseer_in_queue.put(shutdown_msg)
+            self.election_in_queue.put(shutdown_msg)
             time.sleep(2)
+            logging.info("Shutting joining subprocesses . . .")
             # join subprocesses
             self.worker_process.join()
             self.overseer_process.join()
             self.elector_process.join()
             time.sleep(2)
+            logging.info("Unsubscribing and deleting message queue . . .")
             # shutdown message queue
             self.message_queue.shutdown()
+            logging.info("Exiting . . .")
 
     def send_outbound_messages(self, out_queue):
         while not out_queue.empty():
             message = out_queue.get()
             message_obj = json.loads(message)
             if message_obj[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_WORKER or \
-                    message_obj[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_OVERSEER:
+                    message_obj[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_OVERSEER or \
+                    message_obj[MESSAGE_TYPE] == INTERNAL_CAN_QUIT:
                 self.election_in_queue.put(message_obj)
                 self.overseer_in_queue.put(message_obj)
                 self.worker_in_queue.put(message_obj)
+            elif message_obj[MESSAGE_TYPE] == SHUTDOWN:
+                self.shutdown()
             else:
                 self.message_queue.send_message(message)
 

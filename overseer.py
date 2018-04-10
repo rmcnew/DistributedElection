@@ -116,6 +116,11 @@ class Overseer:
         logging.info("[ACTIVE OVERSEER] Deleting work item from work queue")
         self.work_queue.delete_message(message_id, receipt_handle)
 
+    def can_quit(self):
+        return self.active_overseer and \
+               self.work_queue.receive_message() is None and \
+               len(self.s3.list_output_folder_contents()) == len(self.input_folder_contents)
+
     def do_active_overseer_tasks(self):
         if self.active_overseer:  # we are the active overseer!
             if self.input_folder_contents is None:
@@ -141,6 +146,9 @@ class Overseer:
                 self.active_overseer = True
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_WORKER:
                 self.active_overseer = False
+            elif message[MESSAGE_TYPE] == INTERNAL_CAN_QUIT:
+                if self.can_quit():
+                    self.overseer_out_queue.put(shutdown_message())
             else:  # begin taking work requests
                 if self.active_overseer:
                     if message[MESSAGE_TYPE] == WORK_REQUEST:

@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import time
 
 import boto3
@@ -12,12 +11,11 @@ class MessageQueue:
     """Wrapper class for easy AWS Simple Queue Service (SQS) usage for use as message queue via SNS"""
 
     def __init__(self, queue_name):
-        os.environ['AWS_DEFAULT_REGION'] = "us-west-2"
-        self.sns = boto3.resource(SNS)
+        self.sns = boto3.resource(SNS, region_name='us-west-2')
         self.topic = self.sns.create_topic(Name=LFDE_SNS_TOPIC)
         self.topic_arn = self.topic.arn
-        self.sqs = boto3.resource(SQS)
-        self.sqs_client = boto3.client(SQS)
+        self.sqs = boto3.resource(SQS, region_name='us-west-2')
+        self.sqs_client = boto3.client(SQS, region_name='us-west-2')
         self.queue = self.sqs.create_queue(QueueName=queue_name)
         self.queue_arn = self.queue.attributes[QUEUE_ARN]
         queue_attributes = MESSAGE_QUEUE_ATTRIBUTES

@@ -141,3 +141,14 @@ def internal_mode_switch_to_worker_message():
     """Internal message directing coordinator mode switch to edit distance worker"""
     message = {MESSAGE_TYPE: INTERNAL_MODE_SWITCH_TO_WORKER}
     return json.dumps(message)
+
+
+def internal_can_quit_message():
+    """Internal message asking active overseer if quit criteria have been reached"""
+    message = {MESSAGE_TYPE: INTERNAL_CAN_QUIT}
+    return json.dumps(message)
+
+
+def internal_shutdown_message():
+    """Internal message for self shutdown"""
+    return {MESSAGE_TYPE: SHUTDOWN}
