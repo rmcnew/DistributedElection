@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import boto3
 
@@ -30,6 +31,20 @@ class SimpleStorageService:
     def download_string_pair(self, string_pair_key, local_save_path):
         logging.debug("Downloading {} to {}".format(string_pair_key, local_save_path))
         self.lfde_bucket.download_file(string_pair_key, local_save_path)
+
+    def list_primed_folder_contents(self):
+        keys = self.list_folder_contents(LFDE_S3_PRIMED_FOLDER)
+        logging.debug("{} contents: {}".format(LFDE_S3_PRIMED_FOLDER, keys))
+        return keys
+
+    def move_from_input_to_primed(self, long_string_pair_id):
+        string_pair_id = Path(long_string_pair_id).name
+        primed_key = "{}/{}".format(LFDE_S3_PRIMED_FOLDER, string_pair_id)
+        input_key = "{}/{}".format(LFDE_S3_BUCKET, long_string_pair_id)
+        self.s3.Object(LFDE_S3_BUCKET, primed_key).copy_from(CopySource=input_key)
+        self.s3.Object(LFDE_S3_BUCKET, primed_key).wait_until_exists()
+        self.s3.Object(LFDE_S3_BUCKET, long_string_pair_id).delete()
+        self.s3.Object(LFDE_S3_BUCKET, long_string_pair_id).wait_until_not_exists()
 
     def list_output_folder_contents(self):
         keys = self.list_folder_contents(LFDE_S3_OUTPUT_FOLDER)

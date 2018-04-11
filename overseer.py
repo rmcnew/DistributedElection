@@ -1,4 +1,5 @@
 import logging
+import math
 import os
 import time
 from pathlib import Path
@@ -6,7 +7,7 @@ from pathlib import Path
 from aws.s3 import SimpleStorageService
 from aws.work_queue import WorkQueue
 from messages import *
-from shared.concurrent_set import ConcurrentSet
+from overseer_primer import OverseerPrimer
 from shared.shared import *
 
 
@@ -16,37 +17,22 @@ class Overseer:
         self.my_id = my_id
         self.overseer_in_queue = overseer_in_queue
         self.overseer_out_queue = overseer_out_queue
+        self.running = True
         self.work_queue = WorkQueue()
         self.s3 = SimpleStorageService()
         self.active_overseer = False
         self.input_folder_contents = None
-        self.input_folder_not_submitted = ConcurrentSet()
-        self.work_queue_primed = False
         self.temp_dir = get_temp_dir()
-
-    def setup_input_folder_not_submitted(self):
-        logging.debug("Setting up input_folder_not_submitted")
-        for key in self.input_folder_contents:
-            self.input_folder_not_submitted.insert(key)
+        self.primer_threads = []
 
     def broadcast_work_list(self):
         logging.debug("Broadcasting work list to standby overseers")
         self.input_folder_contents = self.s3.list_input_folder_contents()
         self.overseer_out_queue.put(work_list_message(self.input_folder_contents))
-        self.setup_input_folder_not_submitted()
-
-    def calculate_work_queue_primer_pool_size(self):
-        # pool_size = max( (os.cpu_count() * WORK_QUEUE_PRIMER_FACTOR), MAX_WORK_QUEUE_PRIMER_THREADS)
-        pool_size = 2
-        logging.info("Priming work queue with {} threads".format(pool_size))
-        return pool_size
 
     def prime_single_work_item(self, item):
         """item is a single S3 key"""
         logging.info("[ACTIVE OVERSEER] Preparing to enqueue {} in work_queue".format(item))
-        # create local AWS objects for each thread
-        # s3 = SimpleStorageService()
-        # work_queue = WorkQueue()
         temp_file = item.replace("/", "_")
         temp_path = "{}/{}".format(self.temp_dir, temp_file)
         self.s3.download_string_pair(item, temp_path)
@@ -55,19 +41,41 @@ class Overseer:
         string_b = string_pair_file.readline()
         self.work_queue.send_message(work_item_message(item, string_a, string_b))
         self.overseer_out_queue.put(prime_work_queue_message(item))
-        self.input_folder_not_submitted.remove(item)
+        self.s3.move_from_input_to_primed(item)
 
     def prime_work_queue(self):
-        """Prime the work queue using parallel threads"""
+        """Prime the work queue using single thread"""
         logging.info("[ACTIVE OVERSEER] Priming the work queue")
-        # with multiprocessing.Pool(self.calculate_work_queue_primer_pool_size()) as pool:
-        #    pool.map(self.prime_single_work_item, self.input_folder_contents)
-        for item in self.input_folder_not_submitted.get_items():
+        for item in self.input_folder_contents:
             self.prime_single_work_item(item)
         # announce when the work queue is primed
         logging.info("[ACTIVE OVERSEER] Work queue is primed.  Notifying workers to send requests")
         self.overseer_out_queue.put(work_queue_ready_message())
-        self.work_queue_primed = True
+
+    def calculate_work_queue_primer_threads_to_use(self):
+        pool_size = max((os.cpu_count() * WORK_QUEUE_PRIMER_FACTOR), MAX_WORK_QUEUE_PRIMER_THREADS)
+        logging.info("Priming work queue with {} threads".format(pool_size))
+        return pool_size
+
+    def prime_work_queue_parallel(self):
+        """Prime the work queue using parallel threads"""
+        logging.info("[ACTIVE OVERSEER] Priming the work queue in parallel")
+        threads_to_use = self.calculate_work_queue_primer_threads_to_use()
+        last_index = len(self.input_folder_contents)
+        partition_size = math.ceil(last_index / threads_to_use)
+        index = 0
+        while index < last_index:
+            start_index = index
+            end_index = min(index + partition_size, last_index)
+            logging.info("Preparing primer thread for range: {} to {}".format(start_index, end_index))
+            primer = OverseerPrimer(self.input_folder_contents[start_index:end_index],
+                                    self.overseer_out_queue, self.temp_dir)
+            self.primer_threads.append(primer)
+            index = end_index
+        # start the primer threads
+        logging.info("Starting primer_threads . . .")
+        for thread in self.primer_threads:
+            thread.start()
 
     def handle_work_request(self, message):
         logging.info("[ACTIVE OVERSEER] Handling work request")
@@ -119,58 +127,49 @@ class Overseer:
     def can_quit(self):
         return self.active_overseer and \
                self.work_queue.receive_message() is None and \
-               len(self.s3.list_output_folder_contents()) == len(self.input_folder_contents)
+               len(self.s3.list_output_folder_contents()) == len(self.s3.list_primed_folder_contents())
+
+    def priming_done(self):
+        return len(self.s3.list_input_folder_contents()) == 0
+
+    def handle_priming_done(self):
+        logging.info("Waiting for primer threads . . .")
+        for thread_done in self.primer_threads:
+            thread_done.join()
+        self.primer_threads = []
+        # announce when the work queue is primed
+        logging.info("[ACTIVE OVERSEER] Work queue is primed.  Notifying workers to send requests")
+        self.overseer_out_queue.put(work_queue_ready_message())
 
     def do_active_overseer_tasks(self):
-        if self.active_overseer:  # we are the active overseer!
-            if self.input_folder_contents is None:
-                # get input folder contents and broadcast it to standby overseers
-                self.broadcast_work_list()
-            if not self.work_queue_primed:
-                # prime the work queue and notify as we go
-                self.prime_work_queue()
+        if self.active_overseer and not self.priming_done() and len(self.primer_threads) == 0:
+            logging.info("[ACTIVE OVERSEER] Doing active overseer tasks!")
+            self.broadcast_work_list()
+            # self.prime_work_queue()
+            self.prime_work_queue_parallel()
+        elif self.active_overseer and self.priming_done() and len(self.primer_threads) > 0:
+            self.handle_priming_done()
 
     def run(self):
-        while True:
+        while self.running:
             self.do_active_overseer_tasks()
             # blocking get
             message = self.overseer_in_queue.get()
             if message[MESSAGE_TYPE] == SHUTDOWN:
                 logging.info("Shutting down . . .")
-                break
-            elif message[MESSAGE_TYPE] == ELECTION_BEGIN or message[MESSAGE_TYPE] == ELECTION_ID_DECLARE or \
-                    message[MESSAGE_TYPE] == ELECTION_COMPARE or message[MESSAGE_TYPE] == ELECTION_END or \
-                    message[MESSAGE_TYPE] == NULL_MESSAGE:
-                pass  # ignore election messages and null messages
+                self.running = False
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_OVERSEER:
                 self.active_overseer = True
+                logging.info("[OVERSEER] Becoming Active Overseer!")
+                if self.priming_done():
+                    self.overseer_out_queue.put(work_queue_ready_message())
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_WORKER:
                 self.active_overseer = False
-            elif message[MESSAGE_TYPE] == INTERNAL_CAN_QUIT:
-                if self.can_quit():
-                    self.overseer_out_queue.put(shutdown_message())
-            else:  # begin taking work requests
-                if self.active_overseer:
-                    if message[MESSAGE_TYPE] == WORK_REQUEST:
-                        self.handle_work_request(message)
-                    elif message[MESSAGE_TYPE] == WORK_RESULT:
-                        self.handle_work_result_message(message)
-                    else:  # ignore other message types
-                        pass
-                else:  # we are a standby overseer, track messages from the active overseer
-                    # get the input folder contents from the work_list_message
-                    if message[MESSAGE_TYPE] == WORK_LIST:
-                        self.input_folder_contents = message[WORK_LIST]
-                        self.setup_input_folder_not_submitted()
-                        logging.info("[STANDBY OVERSEER]  Finished setup of my input_folder_not_submitted")
-                    # track as the work queue is primed
-                    elif message[MESSAGE_TYPE] == PRIME_WORK_QUEUE:
-                        work_item_submitted = message[WORK_ITEM_SUBMITTED]
-                        self.input_folder_not_submitted.remove(work_item_submitted)
-                        logging.info("[STANDBY OVERSEER]  Removed {} from my "
-                                     "input_folder_not_submitted ".format(work_item_submitted))
-                    elif message[MESSAGE_TYPE] == WORK_QUEUE_READY:
-                        self.work_queue_primed = True
-                        logging.info("[STANDBY OVERSEER]  Tracking work_queue_primed is TRUE.")
-                    else:  # ignore other message types
-                        pass
+            elif message[MESSAGE_TYPE] == INTERNAL_CAN_QUIT and self.can_quit():
+                self.overseer_out_queue.put(shutdown_message())
+            elif self.active_overseer and message[MESSAGE_TYPE] == WORK_REQUEST:
+                self.handle_work_request(message)
+            elif self.active_overseer and message[MESSAGE_TYPE] == WORK_RESULT:
+                self.handle_work_result_message(message)
+            else:  # ignore other message types
+                pass
