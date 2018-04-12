@@ -158,6 +158,10 @@ class Overseer:
             if message[MESSAGE_TYPE] == SHUTDOWN:
                 logging.info("Shutting down . . .")
                 self.running = False
+            elif message[MESSAGE_TYPE] == ELECTION_BEGIN or \
+                    message[MESSAGE_TYPE] == ELECTION_ID_DECLARE or \
+                    message[MESSAGE_TYPE] == ELECTION_COMPARE:
+                self.active_overseer = False
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_OVERSEER:
                 self.active_overseer = True
                 logging.info("[OVERSEER] Becoming Active Overseer!")

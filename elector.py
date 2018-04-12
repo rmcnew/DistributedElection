@@ -1,5 +1,4 @@
 import logging
-import time
 
 from messages import *
 
@@ -56,7 +55,6 @@ class Elector:
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 logging.debug("Null message received.")
                 self.null_message_count = self.null_message_count + 1
-                time.sleep(1)
                 if self.election_winner and self.null_message_count > ELECTION_WINNER_WAIT_CYCLES:
                     self.election_out_queue.put(election_end_message(self.my_id))
             else:  # ignore other message types
@@ -88,7 +86,7 @@ class Elector:
             elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
                 self.election_over = False
                 self.null_message_count = 0
-                self.election_winner = True
+                self.election_winner = False
                 self.conduct_election()
             # as long as we see messages from the active overseer, reset the null message counter
             elif message[MESSAGE_TYPE] == WORK_LIST or message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
