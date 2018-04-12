@@ -11,13 +11,23 @@ class Elector:
         self.election_in_queue = election_in_queue
         self.election_out_queue = election_out_queue
         self.election_over = False
-        self.election_winner = False
+        self.election_winner = None
         self.null_message_count = 0
 
     def compare_ids(self, their_id):
         return int(self.my_id) > int(their_id)
 
+    def update_election_winner(self, result):
+        if self.election_winner is None:
+            self.election_winner = result
+        else:
+            self.election_winner = self.election_winner and result
+
     def conduct_election(self):
+        # set tracking variables
+        self.election_over = False
+        self.null_message_count = 0
+        self.election_winner = None
         # send out my_id in a election_id_declare_message
         self.election_out_queue.put(election_id_declare_message(self.my_id))
         # then wait for responses from other processes
@@ -34,11 +44,11 @@ class Elector:
                 elif self.compare_ids(their_id):
                     logging.info("My ID={} beats THEIR_ID={}".format(self.my_id, their_id))
                     self.election_out_queue.put(election_compare_message(self.my_id, their_id))
-                    self.election_winner = True
+                    self.update_election_winner(I_WIN)
                     self.election_out_queue.put(election_id_declare_message(self.my_id))  # declare again
                 else:
                     logging.info("My ID={} loses to THEIR_ID={}".format(self.my_id, their_id))
-                    self.election_winner = False
+                    self.update_election_winner(THEY_WIN)
             elif message[MESSAGE_TYPE] == ELECTION_COMPARE:
                 logging.debug("Message type is ELECTION_COMPARE")
                 logging.info("{}".format(message))
@@ -55,7 +65,7 @@ class Elector:
                     self.election_out_queue.put(internal_mode_switch_to_worker_message())
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 logging.debug("Null message received.")
-                time.sleep(2)  # wait to make sure no more messages are received
+                time.sleep(0.5)  # wait to make sure no more messages are received
                 self.null_message_count = self.null_message_count + 1
                 if self.election_winner and self.null_message_count > ELECTION_WINNER_WAIT_CYCLES:
                     self.election_out_queue.put(election_end_message(self.my_id))
@@ -86,9 +96,6 @@ class Elector:
                     self.election_out_queue.put(internal_can_quit_message())
             # if we get an ELECTION_BEGIN message, conduct an election
             elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
-                self.election_over = False
-                self.null_message_count = 0
-                self.election_winner = False
                 self.conduct_election()
             # as long as we see messages from the active overseer, reset the null message counter
             elif message[MESSAGE_TYPE] == WORK_LIST or message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
