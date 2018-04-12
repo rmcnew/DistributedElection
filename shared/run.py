@@ -62,3 +62,9 @@ class Run:
         process = Process(target=self.run_as_subprocess, args=(command_line,))
         self.processes.append(process)
         process.start()
+
+    def processes_done(self):
+        for process in self.processes:
+            if process.is_alive():
+                return False
+        return True
