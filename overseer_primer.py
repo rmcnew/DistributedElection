@@ -23,12 +23,12 @@ class OverseerPrimer(Thread):
             logging.info("[ACTIVE OVERSEER PRIMER] Preparing to enqueue {} in work_queue".format(item))
             temp_file = item.replace("/", "_")
             temp_path = "{}/{}".format(self.temp_dir, temp_file)
-            s3.download_string_pair(item, temp_path)
-            string_pair_file = open(temp_path, READ_ONLY)
-            string_a = string_pair_file.readline()
-            string_b = string_pair_file.readline()
-            work_queue.send_message(work_item_message(item, string_a, string_b))
-            s3.move_from_input_to_primed(item)
-            counter = counter + 1
-            if counter % 7 == 0:  # only notify every N messages
-                self.overseer_out_queue.put(prime_work_queue_message(item))
+            if s3.download_string_pair(item, temp_path):
+                string_pair_file = open(temp_path, READ_ONLY)
+                string_a = string_pair_file.readline()
+                string_b = string_pair_file.readline()
+                work_queue.send_message(work_item_message(item, string_a, string_b))
+                s3.move_from_input_to_primed(item)
+                counter = counter + 1
+                if counter % 7 == 0:  # only notify every N messages
+                    self.overseer_out_queue.put(prime_work_queue_message(item))

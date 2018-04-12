@@ -30,7 +30,11 @@ class SimpleStorageService:
 
     def download_string_pair(self, string_pair_key, local_save_path):
         logging.debug("Downloading {} to {}".format(string_pair_key, local_save_path))
-        self.lfde_bucket.download_file(string_pair_key, local_save_path)
+        try:
+            self.lfde_bucket.download_file(string_pair_key, local_save_path)
+            return True
+        except:
+            return False
 
     def list_primed_folder_contents(self):
         keys = self.list_folder_contents(LFDE_S3_PRIMED_FOLDER)
