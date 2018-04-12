@@ -7,7 +7,7 @@ class EditDistanceCalculator:
 
     def __init__(self):
         self.libpath = Path("edit_distance/libwagnerfischer.so").resolve()
-        self.wagnerfischer = CDLL(self.libpath)
+        self.wagnerfischer = CDLL(str(self.libpath))
 
     def calculate_edit_distance(self, string_a, string_b):
         return self.wagnerfischer.calculate_edit_distance(string_a.encode(), string_b.encode())
