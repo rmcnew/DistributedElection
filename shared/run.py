@@ -2,16 +2,21 @@
 import argparse
 import logging
 import os
+import signal
 import subprocess
 import sys
 from multiprocessing import Process
 
-from shared.constants import *
+import boto3
+
+from messages import *
 
 
 class Run:
 
     def __init__(self):
+        self.sns = boto3.resource(SNS, region_name='us-west-2')
+        self.topic = self.sns.create_topic(Name=LFDE_SNS_TOPIC)
         self.processes = []
 
     def parse_command_line(self):
@@ -33,6 +38,9 @@ class Run:
                   "\nwhere COUNT is the desired number of Coordinator processes to run".format(sys.argv[0]))
             exit(0)
 
+    def send_shutdown_message(self):
+        self.topic.publish(Message=shutdown_message())
+
     def get_python_interpreter(self):
         return sys.executable
 
@@ -45,6 +53,7 @@ class Run:
 
     def run_as_subprocess(self, command_line):
         split_command_line = command_line.split(' ')
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
         completed = subprocess.run(split_command_line, stdin=None)
         return completed
 

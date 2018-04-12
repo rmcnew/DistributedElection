@@ -12,8 +12,8 @@ class RunLocal(Run):
 
 
 def main():
-    logging.basicConfig(format='%(message)s',
-                        level=logging.INFO, )
+    logging.basicConfig(format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d : %(message)s',
+                        level=logging.INFO)
 
     run_local = RunLocal()
     coordinator_count = run_local.parse_command_line()
@@ -34,9 +34,11 @@ def main():
         except KeyboardInterrupt:
             break
 
-    logging.info("\nStopping the coordinator processes . . .")
+    logging.info("\nSending shutdown directive to coordinator processes . . .")
+    run_local.send_shutdown_message()
+    time.sleep(2)
+    logging.info("Waiting for coordinator processes to shutdown . . .")
     for process in run_local.processes:
-        logging.debug("Joining coordinator {}".format(process.my_id))
         process.join()
     logging.info("All coordinator processes stopped.  Exiting . . .")
 

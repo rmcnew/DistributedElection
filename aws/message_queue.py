@@ -59,8 +59,12 @@ class MessageQueue:
         return result
 
     def receive_message(self):
-        messages = self.queue.receive_messages()
-        if len(messages) > 0:
+        messages = None
+        try:
+            messages = self.queue.receive_messages()
+        except:
+            pass
+        if messages is not None and len(messages) > 0:
             message = json.loads(messages[0].body)
             message_id = messages[0].message_id
             body = message[MESSAGE]
