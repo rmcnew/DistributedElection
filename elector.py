@@ -1,4 +1,5 @@
 import logging
+import time
 
 from messages import *
 
@@ -34,7 +35,7 @@ class Elector:
                     logging.info("My ID={} beats THEIR_ID={}".format(self.my_id, their_id))
                     self.election_out_queue.put(election_compare_message(self.my_id, their_id))
                     self.election_winner = True
-                    # self.election_out_queue.put(election_id_declare_message(self.my_id))  # declare again
+                    self.election_out_queue.put(election_id_declare_message(self.my_id))  # declare again
                 else:
                     logging.info("My ID={} loses to THEIR_ID={}".format(self.my_id, their_id))
                     self.election_winner = False
@@ -46,7 +47,7 @@ class Elector:
                 logging.info("Election is over.  New Overseer is: {}".format(message[WINNER_ID]))
                 self.election_over = True
                 self.null_message_count = 0  # reset to enable detection of missing active overseer
-                if self.election_winner:
+                if self.election_winner and (message[WINNER_ID]) == int(self.my_id):
                     logging.info("Election won!  Changing to OVERSEER mode!")
                     self.election_out_queue.put(internal_mode_switch_to_overseer_message())
                 else:
@@ -54,6 +55,7 @@ class Elector:
                     self.election_out_queue.put(internal_mode_switch_to_worker_message())
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 logging.debug("Null message received.")
+                time.sleep(2)  # wait to make sure no more messages are received
                 self.null_message_count = self.null_message_count + 1
                 if self.election_winner and self.null_message_count > ELECTION_WINNER_WAIT_CYCLES:
                     self.election_out_queue.put(election_end_message(self.my_id))
