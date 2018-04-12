@@ -1,6 +1,8 @@
 ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT = 10
 CONTENTS = "Contents"
 COORDINATOR = "coordinator"
+COORDINATOR_SCRIPT_NAME = "coordinator.py"
+COUNT = "count"
 DOT = "."
 EDIT_DISTANCE = "edit_distance"
 EDIT_DISTANCE_WORKER_SLEEP = 3  # seconds
@@ -25,7 +27,7 @@ LFDE_S3_PRIMED_FOLDER = "StringPairsPrimed"
 LFDE_S3_OUTPUT_FOLDER = "StringPairsResults"
 LFDE_SNS_TOPIC = "liquid_fortress_distributed_election"
 LOSER_ID = "loser_id"
-MIN_WORK_QUEUE_PRIMER_THREADS = 2
+MAX_COORDINATOR_PROCESSES = 20
 MAX_WORK_QUEUE_PRIMER_THREADS = 24
 MESSAGE = "Message"
 MESSAGE_ID = "MessageId"

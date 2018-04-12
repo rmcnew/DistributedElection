@@ -112,7 +112,7 @@ class Coordinator:
 def main():
     log_file = "{}-{}.log".format(COORDINATOR, getpid())
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d : %(message)s',
-                        # filename=log_file,
+                        filename=log_file,
                         level=logging.INFO)
     coordinator = Coordinator()
 
