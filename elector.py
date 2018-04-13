@@ -1,5 +1,4 @@
 import logging
-import time
 
 from messages import *
 
@@ -45,7 +44,7 @@ class Elector:
                     logging.info("My ID={} beats THEIR_ID={}".format(self.my_id, their_id))
                     self.election_out_queue.put(election_compare_message(self.my_id, their_id))
                     self.update_election_winner(I_WIN)
-                    self.election_out_queue.put(election_id_declare_message(self.my_id))  # declare again
+                    # self.election_out_queue.put(election_id_declare_message(self.my_id))  # declare again
                 else:
                     logging.info("My ID={} loses to THEIR_ID={}".format(self.my_id, their_id))
                     self.update_election_winner(THEY_WIN)
@@ -65,7 +64,7 @@ class Elector:
                     self.election_out_queue.put(internal_mode_switch_to_worker_message())
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 logging.debug("Null message received.")
-                time.sleep(0.5)  # wait to make sure no more messages are received
+                # time.sleep(0.5)  # wait to make sure no more messages are received
                 self.null_message_count = self.null_message_count + 1
                 if self.election_winner and self.null_message_count > ELECTION_WINNER_WAIT_CYCLES:
                     self.election_out_queue.put(election_end_message(self.my_id))
