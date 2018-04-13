@@ -50,6 +50,7 @@ SQS = "sqs"
 STRING_A = "string_a"
 STRING_B = "string_b"
 STRING_PAIR_ID = "string_pair_id"
+TEST_DATA = "test_data"
 THEY_WIN = False
 TIMESTAMP = "timestamp"
 TO_ID = "to_id"
