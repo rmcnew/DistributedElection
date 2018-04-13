@@ -1,4 +1,5 @@
 import logging
+import time
 
 from messages import *
 
@@ -56,7 +57,7 @@ class Elector:
                 logging.info("Election is over.  New Overseer is: {}".format(message[WINNER_ID]))
                 self.election_over = True
                 self.null_message_count = 0  # reset to enable detection of missing active overseer
-                if self.election_winner and (message[WINNER_ID]) == int(self.my_id):
+                if self.election_winner and int(message[WINNER_ID]) == int(self.my_id):
                     logging.info("Election won!  Changing to OVERSEER mode!")
                     self.election_out_queue.put(internal_mode_switch_to_overseer_message())
                 else:
@@ -73,6 +74,7 @@ class Elector:
 
     def run(self):
         # on initial start-up, kick off an election
+        time.sleep(2.5)  # wait a short bit 
         logging.info("Conducting election:  My ID is {} . . .".format(self.my_id))
         self.election_out_queue.put(election_begin_message())
         # otherwise, wait for messages announcing a new election
