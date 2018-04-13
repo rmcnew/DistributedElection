@@ -152,3 +152,9 @@ def internal_can_quit_message():
 def internal_shutdown_message():
     """Internal message for self shutdown"""
     return {MESSAGE_TYPE: SHUTDOWN}
+
+
+def abort_priming_message():
+    """Message to overseer_primer threads telling them to abort priming the work queue"""
+    return {MESSAGE_TYPE: ABORT_PRIMING,
+            TIMESTAMP: timestamp()}

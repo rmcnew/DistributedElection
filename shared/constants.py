@@ -1,3 +1,4 @@
+ABORT_PRIMING = "abort_priming"
 ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT = 10
 CONTENTS = "Contents"
 COORDINATOR = "coordinator"

@@ -3,6 +3,7 @@ import math
 import os
 import time
 from pathlib import Path
+from multiprocessing import Queue
 
 from aws.s3 import SimpleStorageService
 from aws.work_queue import WorkQueue
@@ -23,7 +24,20 @@ class Overseer:
         self.active_overseer = False
         self.input_folder_contents = None
         self.temp_dir = get_temp_dir()
+        self.primer_threads_queue = Queue()  # used to signal primer threads to halt 
         self.primer_threads = []
+
+    def abort_priming(self):
+        if len(self.primer_threads) > 0:
+            logging.info("Aborting work queue priming")
+            self.primer_threads_queue.put(abort_priming_message())
+            for thread in self.primer_threads:
+                thread.join()
+
+    def shutdown(self):
+        self.abort_priming()
+        logging.info("Shutting down")
+        self.running = False
 
     def broadcast_work_list(self):
         logging.debug("Broadcasting work list to standby overseers")
@@ -69,7 +83,7 @@ class Overseer:
             end_index = min(index + partition_size, last_index)
             logging.info("Preparing primer thread for range: {} to {}".format(start_index, end_index))
             primer = OverseerPrimer(self.input_folder_contents[start_index:end_index],
-                                    self.overseer_out_queue, self.temp_dir)
+                                    self.overseer_out_queue, self.temp_dir, self.primer_threads_queue)
             self.primer_threads.append(primer)
             index = end_index
         # start the primer threads
@@ -156,12 +170,12 @@ class Overseer:
             # blocking get
             message = self.overseer_in_queue.get()
             if message[MESSAGE_TYPE] == SHUTDOWN:
-                logging.info("Shutting down . . .")
-                self.running = False
+                self.shutdown()
             elif message[MESSAGE_TYPE] == ELECTION_BEGIN or \
                     message[MESSAGE_TYPE] == ELECTION_ID_DECLARE or \
                     message[MESSAGE_TYPE] == ELECTION_COMPARE:
                 self.active_overseer = False
+                self.abort_priming()
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_OVERSEER:
                 self.active_overseer = True
                 logging.info("[OVERSEER] Becoming Active Overseer!")

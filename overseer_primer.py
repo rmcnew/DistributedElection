@@ -8,11 +8,12 @@ from messages import *
 
 class OverseerPrimer(Thread):
 
-    def __init__(self, item_list, overseer_out_queue, temp_dir):
-        super().__init__()
+    def __init__(self, item_list, overseer_out_queue, temp_dir, primer_threads_queue):
+        super().__init__(daemon=True)  # do not block if the parent Ctrl-C interrupt is triggered
         self.item_list = item_list
         self.overseer_out_queue = overseer_out_queue
         self.temp_dir = temp_dir
+        self.primer_threads_queue = primer_threads_queue
 
     def run(self):
         # create local AWS objects for each thread
@@ -20,6 +21,13 @@ class OverseerPrimer(Thread):
         work_queue = WorkQueue()
         counter = 0
         for item in self.item_list:
+            try:
+                message = self.primer_threads_queue.get_nowait()
+                if message[MESSAGE_TYPE] == ABORT_PRIMING:
+                    logging.info("[ACTIVE OVERSEER PRIMER] Received abort priming message.  Aborting . . .")
+                    break
+            except Empty:
+                pass
             logging.info("[ACTIVE OVERSEER PRIMER] Preparing to enqueue {} in work_queue".format(item))
             temp_file = item.replace("/", "_")
             temp_path = "{}/{}".format(self.temp_dir, temp_file)

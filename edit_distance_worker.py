@@ -33,7 +33,7 @@ class EditDistanceWorker:
             logging.info("[ACTIVE WORKER] Work result ready!  Sending result message: {}".format(result))
             self.work_out_queue.put(result)
             self.work_requested = False
-        else:
+        elif self.active_worker:
             logging.info("Work is not for me!  It is for ID {}".format(work_response_msg[REQUESTER_ID]))
 
     def handle_work_result_received(self, message):
