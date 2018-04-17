@@ -19,6 +19,7 @@ class EditDistanceWorker:
         if self.work_queue_primed and self.active_worker and not self.work_requested:
             logging.info("[ACTIVE WORKER] Requesting work for ID {}".format(self.my_id))
             self.work_out_queue.put(work_request_message(self.my_id))
+            self.work_requested = True
 
     def do_work(self, work_response_msg):
         if work_response_msg[REQUESTER_ID] == self.my_id:
@@ -32,7 +33,6 @@ class EditDistanceWorker:
             result = work_result_message(self.my_id, string_pair_id, edit_distance, message_id, receipt_handle)
             logging.info("[ACTIVE WORKER] Work result ready!  Sending result message: {}".format(result))
             self.work_out_queue.put(result)
-            self.work_requested = False
         elif self.active_worker:
             logging.info("Work is not for me!  It is for ID {}".format(work_response_msg[REQUESTER_ID]))
 

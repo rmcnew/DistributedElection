@@ -25,7 +25,7 @@ class Overseer:
         self.input_folder_contents = None
         self.temp_dir = get_temp_dir()
         self.primer_threads_queue = Queue()  # used to signal primer threads to halt 
-        self.primer_threads = []
+        self.primer_threads = set()
 
     def abort_priming(self):
         if len(self.primer_threads) > 0:
@@ -84,7 +84,7 @@ class Overseer:
             logging.info("Preparing primer thread for range: {} to {}".format(start_index, end_index))
             primer = OverseerPrimer(self.input_folder_contents[start_index:end_index],
                                     self.overseer_out_queue, self.temp_dir, self.primer_threads_queue)
-            self.primer_threads.append(primer)
+            self.primer_threads.add(primer)
             index = end_index
         # start the primer threads
         logging.info("Starting primer_threads . . .")
@@ -147,10 +147,13 @@ class Overseer:
         return len(self.s3.list_input_folder_contents()) == 0
 
     def handle_priming_done(self):
-        logging.info("Waiting for primer threads . . .")
+        logging.info("Queue Priming is done!  Waiting for primer threads . . .")
+        dead_threads = set()
         for thread_done in self.primer_threads:
-            thread_done.join()
-        self.primer_threads = []
+            if not thread_done.is_alive():
+                thread_done.join()
+                dead_threads.add(thread_done)
+        self.primer_threads -= dead_threads
         # announce when the work queue is primed
         logging.info("[ACTIVE OVERSEER] Work queue is primed.  Notifying workers to send requests")
         self.overseer_out_queue.put(work_queue_ready_message())
@@ -163,6 +166,11 @@ class Overseer:
             self.prime_work_queue_parallel()
         elif self.active_overseer and self.priming_done() and len(self.primer_threads) > 0:
             self.handle_priming_done()
+
+    def do_inactive_overseer_tasks(self):
+        # make sure no primer threads are running
+        for thread_done in self.primer_threads:
+            thread_done.join()
 
     def run(self):
         while self.running:
