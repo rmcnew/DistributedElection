@@ -26,13 +26,16 @@ class Overseer:
         self.temp_dir = get_temp_dir()
         self.primer_threads_queue = Queue()  # used to signal primer threads to halt 
         self.primer_threads = set()
+        self.mid_abort = False
 
     def abort_priming(self):
-        if len(self.primer_threads) > 0:
-            logging.info("Aborting work queue priming")
-            self.primer_threads_queue.put(abort_priming_message())
-            for thread in self.primer_threads:
-                thread.join()
+        if not self.mid_abort:
+            self.mid_abort = True
+            if len(self.primer_threads) > 0:
+                logging.info("Aborting work queue priming")
+                self.primer_threads_queue.put(abort_priming_message())
+                for thread in self.primer_threads:
+                    thread.join()
 
     def shutdown(self):
         self.abort_priming()
@@ -146,19 +149,22 @@ class Overseer:
     def priming_done(self):
         return len(self.s3.list_input_folder_contents()) == 0
 
-    def handle_priming_done(self):
-        logging.info("Queue Priming is done!  Waiting for primer threads . . .")
+    def clean_up_primer_threads(self):
         dead_threads = set()
         for thread_done in self.primer_threads:
             if not thread_done.is_alive():
                 thread_done.join()
                 dead_threads.add(thread_done)
         self.primer_threads -= dead_threads
+
+    def handle_priming_done(self):
+        logging.info("Queue Priming is done!  Waiting for primer threads . . .")
+        self.clean_up_primer_threads()
         # announce when the work queue is primed
         logging.info("[ACTIVE OVERSEER] Work queue is primed.  Notifying workers to send requests")
         self.overseer_out_queue.put(work_queue_ready_message())
 
-    def do_active_overseer_tasks(self):
+    def do_overseer_tasks(self):
         if self.active_overseer and not self.priming_done() and len(self.primer_threads) == 0:
             logging.info("[ACTIVE OVERSEER] Doing active overseer tasks!")
             self.broadcast_work_list()
@@ -166,22 +172,17 @@ class Overseer:
             self.prime_work_queue_parallel()
         elif self.active_overseer and self.priming_done() and len(self.primer_threads) > 0:
             self.handle_priming_done()
-
-    def do_inactive_overseer_tasks(self):
-        # make sure no primer threads are running
-        for thread_done in self.primer_threads:
-            thread_done.join()
+        else:  # inactive overseer
+            self.clean_up_primer_threads()
 
     def run(self):
         while self.running:
-            self.do_active_overseer_tasks()
+            self.do_overseer_tasks()
             # blocking get
             message = self.overseer_in_queue.get()
             if message[MESSAGE_TYPE] == SHUTDOWN:
                 self.shutdown()
-            elif message[MESSAGE_TYPE] == ELECTION_BEGIN or \
-                    message[MESSAGE_TYPE] == ELECTION_ID_DECLARE or \
-                    message[MESSAGE_TYPE] == ELECTION_COMPARE:
+            elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
                 self.active_overseer = False
                 self.abort_priming()
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_OVERSEER:
