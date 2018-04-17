@@ -2,8 +2,8 @@ import logging
 import math
 import os
 import time
-from pathlib import Path
 from multiprocessing import Queue
+from pathlib import Path
 
 from aws.s3 import SimpleStorageService
 from aws.work_queue import WorkQueue
@@ -67,7 +67,7 @@ class Overseer:
         self.overseer_out_queue.put(work_queue_ready_message())
 
     def calculate_work_queue_primer_threads_to_use(self):
-        pool_size = max((os.cpu_count() * WORK_QUEUE_PRIMER_FACTOR), MAX_WORK_QUEUE_PRIMER_THREADS)
+        pool_size = min((os.cpu_count() * WORK_QUEUE_PRIMER_FACTOR), MAX_WORK_QUEUE_PRIMER_THREADS)
         logging.info("Priming work queue with {} threads".format(pool_size))
         return pool_size
 
