@@ -43,25 +43,21 @@ class Coordinator:
 
     def shutdown(self):
         if not self.in_shutdown:  # prevent multiple calls
+            self.in_shutdown = True
             logging.info("Received SHUTDOWN directive!")
             self.running = False
-            self.in_shutdown = True
+            logging.info("Unsubscribing and deleting message queue . . .")
+            self.message_queue.shutdown()
             logging.info("Shutting down subprocesses . . .")
-            # send shutdown message to subprocesses
             shutdown_msg = internal_shutdown_message()
             self.worker_in_queue.put(shutdown_msg)
             self.overseer_in_queue.put(shutdown_msg)
             self.election_in_queue.put(shutdown_msg)
             time.sleep(2)
             logging.info("Shutting joining subprocesses . . .")
-            # join subprocesses
             self.worker_process.join()
             self.overseer_process.join()
             self.elector_process.join()
-            time.sleep(2)
-            logging.info("Unsubscribing and deleting message queue . . .")
-            # shutdown message queue
-            self.message_queue.shutdown()
             logging.info("Exiting . . .")
 
     def send_outbound_messages(self, out_queue):
@@ -74,8 +70,6 @@ class Coordinator:
                 self.election_in_queue.put(message_obj)
                 self.overseer_in_queue.put(message_obj)
                 self.worker_in_queue.put(message_obj)
-            elif message_obj[MESSAGE_TYPE] == SHUTDOWN:
-                self.shutdown()
             else:
                 self.message_queue.send_message(message)
 
@@ -88,8 +82,10 @@ class Coordinator:
             if message is None:  # if no message received within timeout, send NULL_MESSAGE
                 message = null_message()
             if message[MESSAGE_TYPE] == INDIVIDUAL_SHUTDOWN and message[TO_ID] == self.my_id:
+                logging.info("Received individual_shutdown message.  Shutting down . . .")
                 self.shutdown()
             elif message[MESSAGE_TYPE] == SHUTDOWN:
+                logging.info("Received general shutdown message.")
                 self.shutdown()
             else:
                 self.election_in_queue.put(message)
