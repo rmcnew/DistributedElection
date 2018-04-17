@@ -1,4 +1,5 @@
 import logging
+from queue import Empty
 from threading import Thread
 
 from aws.s3 import SimpleStorageService

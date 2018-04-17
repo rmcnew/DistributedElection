@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a4a809c4-c2be-4bfa-8ccd-784460c427ef" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/elector.py" beforeDir="false" afterPath="$PROJECT_DIR$/elector.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/overseer_primer.py" beforeDir="false" afterPath="$PROJECT_DIR$/overseer_primer.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -26,16 +26,16 @@
       <file leaf-file-name="test_message_queue.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/unit_test/test_message_queue.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="272">
+            <state relative-caret-position="289">
               <caret line="17" column="48" selection-start-line="17" selection-start-column="48" selection-end-line="17" selection-end-column="48" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="elector.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="elector.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/elector.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="731">
+            <state relative-caret-position="323">
               <caret line="76" column="44" selection-start-line="76" selection-start-column="44" selection-end-line="76" selection-end-column="44" />
             </state>
           </provider>
@@ -44,8 +44,17 @@
       <file leaf-file-name="overseer_primer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/overseer_primer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="425">
-              <caret line="25" column="56" selection-start-line="25" selection-start-column="56" selection-end-line="25" selection-end-column="56" />
+            <state relative-caret-position="136">
+              <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="overseer.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/overseer.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1292">
+              <caret line="76" column="74" lean-forward="true" selection-start-line="76" selection-start-column="74" selection-end-line="76" selection-end-column="74" />
             </state>
           </provider>
         </entry>
@@ -53,7 +62,7 @@
       <file leaf-file-name="messages.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/messages.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2523">
+            <state relative-caret-position="891">
               <caret line="151" column="16" selection-start-line="151" selection-start-column="16" selection-end-line="151" selection-end-column="16" />
             </state>
           </provider>
@@ -104,12 +113,12 @@
         <option value="$PROJECT_DIR$/run_local.py" />
         <option value="$PROJECT_DIR$/edit_distance/edit_distance.py" />
         <option value="$PROJECT_DIR$/aws/s3.py" />
-        <option value="$PROJECT_DIR$/overseer_primer.py" />
         <option value="$PROJECT_DIR$/overseer.py" />
         <option value="$PROJECT_DIR$/shared/constants.py" />
         <option value="$PROJECT_DIR$/unit_test/message_queue_test.py" />
         <option value="$PROJECT_DIR$/unit_test/test_message_queue.py" />
         <option value="$PROJECT_DIR$/elector.py" />
+        <option value="$PROJECT_DIR$/overseer_primer.py" />
       </list>
     </option>
   </component>
@@ -127,7 +136,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -154,6 +162,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -412,7 +421,14 @@
       <option name="project" value="LOCAL" />
       <updated>1523587379777</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="Fix typo that was causing election winner to not be recognized">
+      <created>1523589217865</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1523589217865</updated>
+    </task>
+    <option name="localTasksCounter" value="22" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -502,7 +518,8 @@
     <MESSAGE value="Fix multiple overseer election bug" />
     <MESSAGE value="Another improvement in multiple Overseer prevention" />
     <MESSAGE value="Elector tuning and add message_queue unit test" />
-    <option name="LAST_COMMIT_MESSAGE" value="Elector tuning and add message_queue unit test" />
+    <MESSAGE value="Fix typo that was causing election winner to not be recognized" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix typo that was causing election winner to not be recognized" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -776,13 +793,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/overseer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2720">
-          <caret line="160" column="61" selection-start-line="160" selection-start-column="17" selection-end-line="160" selection-end-column="61" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/aws/s3.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="510">
@@ -797,6 +807,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/elector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="323">
+          <caret line="76" column="44" selection-start-line="76" selection-start-column="44" selection-end-line="76" selection-end-column="44" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/overseer_primer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="136">
+          <caret line="8" lean-forward="true" selection-start-line="8" selection-end-line="8" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/aws/message_queue.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="687">
@@ -806,29 +830,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/unit_test/test_message_queue.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="272">
+        <state relative-caret-position="289">
           <caret line="17" column="48" selection-start-line="17" selection-start-column="48" selection-end-line="17" selection-end-column="48" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/messages.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2523">
+        <state relative-caret-position="891">
           <caret line="151" column="16" selection-start-line="151" selection-start-column="16" selection-end-line="151" selection-end-column="16" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/overseer_primer.py">
+    <entry file="file://$PROJECT_DIR$/overseer.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="425">
-          <caret line="25" column="56" selection-start-line="25" selection-start-column="56" selection-end-line="25" selection-end-column="56" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/elector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="731">
-          <caret line="76" column="44" selection-start-line="76" selection-start-column="44" selection-end-line="76" selection-end-column="44" />
+        <state relative-caret-position="1292">
+          <caret line="76" column="74" lean-forward="true" selection-start-line="76" selection-start-column="74" selection-end-line="76" selection-end-column="74" />
         </state>
       </provider>
     </entry>
