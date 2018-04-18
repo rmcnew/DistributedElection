@@ -57,6 +57,7 @@ class EditDistanceWorker:
             elif message[MESSAGE_TYPE] == INTERNAL_MODE_SWITCH_TO_WORKER:
                 logging.info("Switching to Active Worker mode!")
                 self.active_worker = True
+                self.work_requested = False
                 self.request_work()
             elif message[MESSAGE_TYPE] == WORK_QUEUE_READY:
                 self.work_queue_primed = True
