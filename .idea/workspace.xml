@@ -4,9 +4,7 @@
     <list default="true" id="a4a809c4-c2be-4bfa-8ccd-784460c427ef" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/aws/message_queue.py" beforeDir="false" afterPath="$PROJECT_DIR$/aws/message_queue.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/coordinator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_local.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_local.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/shared/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/shared/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/elector.py" beforeDir="false" afterPath="$PROJECT_DIR$/elector.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,11 +15,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="message_queue.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="message_queue.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/aws/message_queue.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="551">
-              <caret line="59" column="25" selection-start-line="59" selection-start-column="25" selection-end-line="59" selection-end-column="25" />
+            <state relative-caret-position="602">
+              <caret line="61" column="29" selection-start-line="61" selection-start-column="29" selection-end-line="61" selection-end-column="29" />
             </state>
           </provider>
         </entry>
@@ -35,11 +33,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="elector.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="elector.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/elector.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1428">
-              <caret line="84" column="49" selection-start-line="84" selection-start-column="49" selection-end-line="84" selection-end-column="49" />
+            <state relative-caret-position="17">
+              <caret line="29" column="35" lean-forward="true" selection-start-line="29" selection-start-column="35" selection-end-line="29" selection-end-column="35" />
             </state>
           </provider>
         </entry>
@@ -150,7 +148,6 @@
         <option value="$PROJECT_DIR$/aws/s3.py" />
         <option value="$PROJECT_DIR$/unit_test/message_queue_test.py" />
         <option value="$PROJECT_DIR$/unit_test/test_message_queue.py" />
-        <option value="$PROJECT_DIR$/elector.py" />
         <option value="$PROJECT_DIR$/edit_distance_worker.py" />
         <option value="$PROJECT_DIR$/overseer_primer.py" />
         <option value="$PROJECT_DIR$/shared/constants.py" />
@@ -159,6 +156,7 @@
         <option value="$PROJECT_DIR$/shared/run.py" />
         <option value="$PROJECT_DIR$/coordinator.py" />
         <option value="$PROJECT_DIR$/aws/message_queue.py" />
+        <option value="$PROJECT_DIR$/elector.py" />
       </list>
     </option>
   </component>
@@ -503,7 +501,14 @@
       <option name="project" value="LOCAL" />
       <updated>1523940049697</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="Change run_local to not shutdown the entire fleet on Ctrl-C.  Do not allow null messages to be sent via message queue.">
+      <created>1524010735459</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1524010735460</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -573,7 +578,6 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="CHECK_NEW_TODO" value="false" />
-    <MESSAGE value="Checkpoint:  combine message_queue and sns to provide message_queue abstraction" />
     <MESSAGE value="Checkpoint:  fixing queue policy" />
     <MESSAGE value="Coordinator hand-off to/from EditDistanceWorker works.  Coordinator ID comparison works.  Next integrate AWS messaging into Coordinator and begin building state machines." />
     <MESSAGE value="Basic election works.  Need to restructure message handling to enable greater flexibility so that an election_begin message received in any mode can cleanly proceed to election.  Initial versions of most message structures defined." />
@@ -598,7 +602,8 @@
     <MESSAGE value="More performance enhancements; also bug fix for Edit Distance Worker" />
     <MESSAGE value="Bug fixes for coordinator shutdown logic" />
     <MESSAGE value="Improve inactive overseer primer thread cleanup;  simplify primer thread abort trigger" />
-    <option name="LAST_COMMIT_MESSAGE" value="Improve inactive overseer primer thread cleanup;  simplify primer thread abort trigger" />
+    <MESSAGE value="Change run_local to not shutdown the entire fleet on Ctrl-C.  Do not allow null messages to be sent via message queue." />
+    <option name="LAST_COMMIT_MESSAGE" value="Change run_local to not shutdown the entire fleet on Ctrl-C.  Do not allow null messages to be sent via message queue." />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
@@ -886,13 +891,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/elector.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1428">
-          <caret line="84" column="49" selection-start-line="84" selection-start-column="49" selection-end-line="84" selection-end-column="49" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/messages.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2142">
@@ -923,8 +921,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/aws/message_queue.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="551">
-          <caret line="59" column="25" selection-start-line="59" selection-start-column="25" selection-end-line="59" selection-end-column="25" />
+        <state relative-caret-position="602">
+          <caret line="61" column="29" selection-start-line="61" selection-start-column="29" selection-end-line="61" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/elector.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="29" column="35" lean-forward="true" selection-start-line="29" selection-start-column="35" selection-end-line="29" selection-end-column="35" />
         </state>
       </provider>
     </entry>

@@ -85,6 +85,14 @@ class Elector:
             if message[MESSAGE_TYPE] == SHUTDOWN:
                 logging.debug("Shutting down . . .")
                 break
+            # if we get an ELECTION_BEGIN message, conduct an election
+            elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
+                self.conduct_election()
+            # as long as we see messages from the active overseer, reset the null message counter
+            elif message[MESSAGE_TYPE] == WORK_LIST or message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
+                    message[MESSAGE_TYPE] == WORK_QUEUE_READY or message[MESSAGE_TYPE] == WORK_RESPONSE or \
+                    message[MESSAGE_TYPE] == WORK_RESULT_RECEIVED:
+                self.null_message_count = 0
             # if we get too many null messages, call for an election
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 self.null_message_count = self.null_message_count + 1
@@ -95,13 +103,5 @@ class Elector:
                 elif self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and self.election_winner:
                     logging.info("No activity.  Asking Overseer process if quit criteria reached")
                     self.election_out_queue.put(internal_can_quit_message())
-            # if we get an ELECTION_BEGIN message, conduct an election
-            elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
-                self.conduct_election()
-            # as long as we see messages from the active overseer, reset the null message counter
-            elif message[MESSAGE_TYPE] == WORK_LIST or message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
-                    message[MESSAGE_TYPE] == WORK_QUEUE_READY or message[MESSAGE_TYPE] == WORK_RESPONSE or \
-                    message[MESSAGE_TYPE] == WORK_RESULT_RECEIVED:
-                self.null_message_count = 0
             else:  # ignore other message types
                 pass

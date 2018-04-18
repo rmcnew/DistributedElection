@@ -54,11 +54,13 @@ class MessageQueue:
         return json_policy_document
 
     def send_message(self, message):
-        if message is not None and message[MESSAGE_TYPE] != NULL_MESSAGE:
-            logging.debug("Publishing message: {}".format(message))
-            result = self.topic.publish(Message=message)
-            logging.debug("Publish result: {}".format(result))
-            return result
+        if message is not None:
+            message_dict = json.loads(message)
+            if message_dict[MESSAGE_TYPE] != NULL_MESSAGE:
+                logging.debug("Publishing message: {}".format(message))
+                result = self.topic.publish(Message=message)
+                logging.debug("Publish result: {}".format(result))
+                return result
 
     def receive_message(self):
         messages = self.queue.receive_messages()
