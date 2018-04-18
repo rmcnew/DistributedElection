@@ -1,5 +1,4 @@
 import logging
-import time
 
 from messages import *
 
@@ -74,7 +73,6 @@ class Elector:
 
     def run(self):
         # on initial start-up, kick off an election
-        time.sleep(2.5)  # wait a short bit 
         logging.info("Conducting election:  My ID is {} . . .".format(self.my_id))
         self.election_out_queue.put(election_begin_message())
         # otherwise, wait for messages announcing a new election
@@ -89,18 +87,22 @@ class Elector:
             elif message[MESSAGE_TYPE] == ELECTION_BEGIN:
                 self.conduct_election()
             # as long as we see messages from the active overseer, reset the null message counter
-            elif message[MESSAGE_TYPE] == WORK_LIST or message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
-                    message[MESSAGE_TYPE] == WORK_QUEUE_READY or message[MESSAGE_TYPE] == WORK_RESPONSE or \
+            elif self.election_over and message[MESSAGE_TYPE] == WORK_LIST or \
+                    message[MESSAGE_TYPE] == PRIME_WORK_QUEUE or \
+                    message[MESSAGE_TYPE] == WORK_QUEUE_READY or \
+                    message[MESSAGE_TYPE] == WORK_RESPONSE or \
                     message[MESSAGE_TYPE] == WORK_RESULT_RECEIVED:
                 self.null_message_count = 0
             # if we get too many null messages, call for an election
             elif message[MESSAGE_TYPE] == NULL_MESSAGE:
                 self.null_message_count = self.null_message_count + 1
-                if self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and not self.election_winner:
+                if self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and self.election_over \
+                        and not self.election_winner:
                     logging.info("No response from active Overseer.  "
                                  "Conducting election:  My ID is {} . . .".format(self.my_id))
                     self.election_out_queue.put(election_begin_message())
-                elif self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and self.election_winner:
+                elif self.null_message_count >= ACTIVE_OVERSEER_MIA_NULL_MESSAGE_LIMIT and self.election_over \
+                        and self.election_winner:
                     logging.info("No activity.  Asking Overseer process if quit criteria reached")
                     self.election_out_queue.put(internal_can_quit_message())
             else:  # ignore other message types
