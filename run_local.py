@@ -38,7 +38,7 @@ def main():
     if not run_local.processes_done():
         # shutting down due to Ctrl-C keyboard interrupt
         logging.info("\nSending shutdown directive to coordinator processes . . .")
-        run_local.send_shutdown_message()
+        run_local.terminate_subprocesses()
         time.sleep(2)
         logging.info("Waiting for coordinator processes to shutdown . . .")
         for process in run_local.processes:

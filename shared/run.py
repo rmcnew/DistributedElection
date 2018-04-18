@@ -38,7 +38,7 @@ class Run:
                   "\nwhere COUNT is the desired number of Coordinator processes to run".format(sys.argv[0]))
             exit(0)
 
-    def send_shutdown_message(self):
+    def send_shutdown_message(self):  # note that this shutsdown the entire fleet (all hosts)
         self.topic.publish(Message=shutdown_message())
 
     def get_python_interpreter(self):
@@ -68,3 +68,7 @@ class Run:
             if process.is_alive():
                 return False
         return True
+
+    def terminate_subprocesses(self):
+        for process in self.processes:
+            process.terminate()

@@ -4,6 +4,7 @@ import time
 
 import boto3
 
+from messages import null_message
 from shared.constants import *
 
 
@@ -53,18 +54,15 @@ class MessageQueue:
         return json_policy_document
 
     def send_message(self, message):
-        logging.debug("Publishing message: {}".format(message))
-        result = self.topic.publish(Message=message)
-        logging.debug("Publish result: {}".format(result))
-        return result
+        if message is not None and message[MESSAGE_TYPE] != NULL_MESSAGE:
+            logging.debug("Publishing message: {}".format(message))
+            result = self.topic.publish(Message=message)
+            logging.debug("Publish result: {}".format(result))
+            return result
 
     def receive_message(self):
-        messages = None
-        try:
-            messages = self.queue.receive_messages()
-        except:
-            pass
-        if messages is not None and len(messages) > 0:
+        messages = self.queue.receive_messages()
+        if len(messages) > 0:
             message = json.loads(messages[0].body)
             message_id = messages[0].message_id
             body = message[MESSAGE]
@@ -73,6 +71,4 @@ class MessageQueue:
             messages[0].delete()
             return body_dict
         else:
-            return None
-
-
+            return null_message()

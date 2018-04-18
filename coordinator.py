@@ -79,8 +79,6 @@ class Coordinator:
         if self.running:
             message = self.message_queue.receive_message()
             logging.debug("message is {}".format(message))
-            if message is None:  # if no message received within timeout, send NULL_MESSAGE
-                message = null_message()
             if message[MESSAGE_TYPE] == INDIVIDUAL_SHUTDOWN and message[TO_ID] == self.my_id:
                 logging.info("Received individual_shutdown message.  Shutting down . . .")
                 self.shutdown()
