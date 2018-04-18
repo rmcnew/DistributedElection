@@ -14,9 +14,6 @@ class RunLocal(Run):
 def main():
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d : %(message)s',
                         level=logging.INFO)
-    # silence connectionpool INFO logs; they make the logs harder to read
-    logging.getLogger('requests').setLevel(logging.WARNING)
-    logging.getLogger('urllib3').setLevel(logging.WARNING)
     run_local = RunLocal()
     coordinator_count = run_local.parse_command_line()
     command_line = run_local.build_command_line()

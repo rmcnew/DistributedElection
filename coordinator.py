@@ -108,9 +108,6 @@ def main():
     logging.basicConfig(format='%(asctime)s [%(levelname)s] %(filename)s:%(lineno)d : %(message)s',
                         filename=log_file,
                         level=logging.INFO)
-    # silence connectionpool INFO logs; they make the logs harder to read
-    logging.getLogger('requests').setLevel(logging.WARNING)
-    logging.getLogger('urllib3').setLevel(logging.WARNING)
     coordinator = Coordinator()
 
     def ctrl_c_handler(signum, frame):
