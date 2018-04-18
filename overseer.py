@@ -34,8 +34,7 @@ class Overseer:
             if len(self.primer_threads) > 0:
                 logging.info("Aborting work queue priming")
                 self.primer_threads_queue.put(abort_priming_message())
-                for thread in self.primer_threads:
-                    thread.join()
+                self.clean_up_primer_threads()
 
     def shutdown(self):
         self.abort_priming()

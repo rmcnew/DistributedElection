@@ -45,10 +45,13 @@ class SimpleStorageService:
         string_pair_id = Path(long_string_pair_id).name
         primed_key = "{}/{}".format(LFDE_S3_PRIMED_FOLDER, string_pair_id)
         input_key = "{}/{}".format(LFDE_S3_BUCKET, long_string_pair_id)
-        self.s3.Object(LFDE_S3_BUCKET, primed_key).copy_from(CopySource=input_key)
-        self.s3.Object(LFDE_S3_BUCKET, primed_key).wait_until_exists()
-        self.s3.Object(LFDE_S3_BUCKET, long_string_pair_id).delete()
-        self.s3.Object(LFDE_S3_BUCKET, long_string_pair_id).wait_until_not_exists()
+        try:
+            self.s3.Object(LFDE_S3_BUCKET, primed_key).copy_from(CopySource=input_key)
+            self.s3.Object(LFDE_S3_BUCKET, primed_key).wait_until_exists()
+            self.s3.Object(LFDE_S3_BUCKET, long_string_pair_id).delete()
+            self.s3.Object(LFDE_S3_BUCKET, long_string_pair_id).wait_until_not_exists()
+        except:
+            pass
 
     def list_output_folder_contents(self):
         keys = self.list_folder_contents(LFDE_S3_OUTPUT_FOLDER)
