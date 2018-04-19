@@ -1,4 +1,5 @@
 import logging
+import time
 
 from messages import *
 
@@ -72,6 +73,7 @@ class Elector:
                 pass
 
     def run(self):
+        time.sleep(3)
         # on initial start-up, kick off an election
         logging.info("Conducting election:  My ID is {} . . .".format(self.my_id))
         self.election_out_queue.put(election_begin_message())
