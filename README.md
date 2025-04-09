@@ -1,4 +1,4 @@
-# Liquid Fortress Distributed Election
+# Distributed Election
 AWS-based edit distance calculation system that uses distributed election to self organize.  
 Created for Distributed Systems graduate school class.
 
@@ -18,7 +18,7 @@ conditions and the following disclaimers.
 Redistributions in binary form must reproduce the above copyright notice, this list of conditions
 and the following disclaimers in the documentation and/or other materials provided with the distribution.
 
-Neither the names of Richard Scott McNew, Liquid Fortress, nor the names of contributors may
+Neither the names of Richard Scott McNew nor the names of contributors may
 be used to endorse or promote products derived from this Software without specific prior written permission.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
